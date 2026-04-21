@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "additionalDirectories": [
+      "/home/ugo/.claude/projects/-home-ugo-Documents-Python-uc-cihaz-obejct-detection-CNN-models-optimized-to-run-on-edge-devices"
+    ],
+    "allow": [
+      "Bash(python3 -c ' *)"
+    ]
+  }
+}
