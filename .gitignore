@@ -1,0 +1,45 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+
+# Virtual environments
+venv/
+nanoenv/
+.env
+.venv
+env/
+
+# Model weights
+*.pt
+*.pth
+*.onnx
+*.engine
+*.tflite
+*.pb
+*.weights
+*.safetensors
+models/*
+models/**/*.safetensors
+
+# Dataset - tamamı ignore
+dataset/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
