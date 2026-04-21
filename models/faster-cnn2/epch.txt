@@ -1,0 +1,217 @@
+Sifirdan baslaniyor.
+100%|██████████| 1965/1965 [07:46<00:00,  4.21it/s]
+Epoch 0, lr: 0.005000, loss: 0.395473, loss_classifier: 0.117499, loss_box: 0.029515, loss_rpn_box: 0.107202, loss_object: 0.141256
+  Eval (2387 images)...
+
+  Val -> cls:0.0301 box:0.1291 P:0.0143 R:0.0762 mAP50:0.0061 mAP50-95:0.0014
+Metrikler kaydedildi: /home/atp-user-18/Desktop/uc_cihazlarda_terhmal_object_detection/runs/faster_cnn3/fasterrcnn_mobilenet_training.xlsx
+  -> best.pt (mAP50-95: 0.0014)
+  -> Epoch 0/150 | LR: 0.004999
+100%|██████████| 1965/1965 [07:48<00:00,  4.19it/s]
+Epoch 1, lr: 0.004999, loss: 0.252529, loss_classifier: 0.033789, loss_box: 0.032039, loss_rpn_box: 0.080886, loss_object: 0.105815
+  Eval (2387 images)...
+
+  Val -> cls:0.0211 box:0.1181 P:0.0190 R:0.1022 mAP50:0.0082 mAP50-95:0.0022
+Metrikler kaydedildi: /home/atp-user-18/Desktop/uc_cihazlarda_terhmal_object_detection/runs/faster_cnn3/fasterrcnn_mobilenet_training.xlsx
+  -> best.pt (mAP50-95: 0.0022)
+  -> Epoch 1/150 | LR: 0.004998
+100%|██████████| 1965/1965 [07:54<00:00,  4.14it/s]
+Epoch 2, lr: 0.004998, loss: 0.232196, loss_classifier: 0.024160, loss_box: 0.037426, loss_rpn_box: 0.072600, loss_object: 0.098010
+  Eval (2387 images)...
+
+  Val -> cls:0.0135 box:0.1178 P:0.0236 R:0.1254 mAP50:0.0182 mAP50-95:0.0066
+Metrikler kaydedildi: /home/atp-user-18/Desktop/uc_cihazlarda_terhmal_object_detection/runs/faster_cnn3/fasterrcnn_mobilenet_training.xlsx
+  -> best.pt (mAP50-95: 0.0066)
+  -> Epoch 2/150 | LR: 0.004995
+100%|██████████| 1965/1965 [07:46<00:00,  4.21it/s]
+Epoch 3, lr: 0.004995, loss: 0.221404, loss_classifier: 0.018920, loss_box: 0.041676, loss_rpn_box: 0.067963, loss_object: 0.092845
+  Eval (2387 images)...
+
+  Val -> cls:0.0150 box:0.1181 P:0.0262 R:0.1392 mAP50:0.0246 mAP50-95:0.0102
+Metrikler kaydedildi: /home/atp-user-18/Desktop/uc_cihazlarda_terhmal_object_detection/runs/faster_cnn3/fasterrcnn_mobilenet_training.xlsx
+  -> best.pt (mAP50-95: 0.0102)
+  -> Epoch 3/150 | LR: 0.004991
+100%|██████████| 1965/1965 [07:44<00:00,  4.23it/s]
+Epoch 4, lr: 0.004991, loss: 0.214636, loss_classifier: 0.016016, loss_box: 0.044907, loss_rpn_box: 0.064759, loss_object: 0.088955
+  Eval (2387 images)...
+
+  Val -> cls:0.0110 box:0.1160 P:0.0275 R:0.1465 mAP50:0.0228 mAP50-95:0.0069
+Metrikler kaydedildi: /home/atp-user-18/Desktop/uc_cihazlarda_terhmal_object_detection/runs/faster_cnn3/fasterrcnn_mobilenet_training.xlsx
+  -> iyilesme yok (1/15)
+  -> Epoch 4/150 | LR: 0.004986
+[Epoch 5] Backbone acildi (full fine-tune).
+100%|██████████| 1965/1965 [10:14<00:00,  3.20it/s]
+Epoch 5, lr: 0.004986, loss: 0.220640, loss_classifier: 0.014611, loss_box: 0.087678, loss_rpn_box: 0.054532, loss_object: 0.063819
+  Eval (2387 images)...
+  Val -> cls:0.0084 box:0.1778 P:0.0423 R:0.1851 mAP50:0.0383 mAP50-95:0.0114
+Metrikler kaydedildi: /home/atp-user-18/Desktop/uc_cihazlarda_terhmal_object_detection/runs/faster_cnn3/fasterrcnn_mobilenet_training.xlsx
+  -> best.pt (mAP50-95: 0.0114)
+  -> Epoch 5/150 | LR: 0.004980
+100%|██████████| 1965/1965 [10:09<00:00,  3.23it/s]
+Epoch 6, lr: 0.004980, loss: 0.235597, loss_classifier: 0.009957, loss_box: 0.126362, loss_rpn_box: 0.046993, loss_object: 0.052285
+  Eval (2387 images)...
+
+  Val -> cls:0.0064 box:0.1991 P:0.0482 R:0.2019 mAP50:0.0488 mAP50-95:0.0139
+Metrikler kaydedildi: /home/atp-user-18/Desktop/uc_cihazlarda_terhmal_object_detection/runs/faster_cnn3/fasterrcnn_mobilenet_training.xlsx
+  -> best.pt (mAP50-95: 0.0139)
+  -> Epoch 6/150 | LR: 0.004973
+100%|██████████| 1965/1965 [10:18<00:00,  3.17it/s]
+Epoch 7, lr: 0.004973, loss: 0.248414, loss_classifier: 0.008078, loss_box: 0.149451, loss_rpn_box: 0.043316, loss_object: 0.047568
+  Eval (2387 images)...
+
+  Val -> cls:0.0053 box:0.2139 P:0.0542 R:0.2118 mAP50:0.0542 mAP50-95:0.0187
+Metrikler kaydedildi: /home/atp-user-18/Desktop/uc_cihazlarda_terhmal_object_detection/runs/faster_cnn3/fasterrcnn_mobilenet_training.xlsx
+  -> best.pt (mAP50-95: 0.0187)
+  -> Epoch 7/150 | LR: 0.004965
+100%|██████████| 1965/1965 [09:51<00:00,  3.32it/s]
+Epoch 8, lr: 0.004965, loss: 0.258717, loss_classifier: 0.006637, loss_box: 0.166611, loss_rpn_box: 0.040835, loss_object: 0.044635
+  Eval (2387 images)...
+
+  Val -> cls:0.0051 box:0.2387 P:0.0615 R:0.2244 mAP50:0.0589 mAP50-95:0.0218
+Metrikler kaydedildi: /home/atp-user-18/Desktop/uc_cihazlarda_terhmal_object_detection/runs/faster_cnn3/fasterrcnn_mobilenet_training.xlsx
+  -> best.pt (mAP50-95: 0.0218)
+  -> Epoch 8/150 | LR: 0.004956
+100%|██████████| 1965/1965 [09:49<00:00,  3.34it/s]
+Epoch 9, lr: 0.004956, loss: 0.267905, loss_classifier: 0.005743, loss_box: 0.180693, loss_rpn_box: 0.039011, loss_object: 0.042458
+  Eval (2387 images)...
+
+  Val -> cls:0.0045 box:0.2540 P:0.0669 R:0.2325 mAP50:0.0740 mAP50-95:0.0281
+Metrikler kaydedildi: /home/atp-user-18/Desktop/uc_cihazlarda_terhmal_object_detection/runs/faster_cnn3/fasterrcnn_mobilenet_training.xlsx
+  -> best.pt (mAP50-95: 0.0281)
+  -> Epoch 9/150 | LR: 0.004945
+100%|██████████| 1965/1965 [10:07<00:00,  3.23it/s]
+Epoch 10, lr: 0.004945, loss: 0.275857, loss_classifier: 0.005219, loss_box: 0.192185, loss_rpn_box: 0.037625, loss_object: 0.040829
+  Eval (2387 images)...
+  Val -> cls:0.0069 box:0.2537 P:0.0690 R:0.2413 mAP50:0.0881 mAP50-95:0.0380
+Metrikler kaydedildi: /home/atp-user-18/Desktop/uc_cihazlarda_terhmal_object_detection/runs/faster_cnn3/fasterrcnn_mobilenet_training.xlsx
+  -> best.pt (mAP50-95: 0.0380)
+  -> Epoch 10/150 | LR: 0.004934
+100%|██████████| 1965/1965 [10:06<00:00,  3.24it/s]
+Epoch 11, lr: 0.004934, loss: 0.282431, loss_classifier: 0.004743, loss_box: 0.201627, loss_rpn_box: 0.036496, loss_object: 0.039565
+  Eval (2387 images)...
+
+  Val -> cls:0.0040 box:0.2608 P:0.0727 R:0.2456 mAP50:0.0876 mAP50-95:0.0379
+Metrikler kaydedildi: /home/atp-user-18/Desktop/uc_cihazlarda_terhmal_object_detection/runs/faster_cnn3/fasterrcnn_mobilenet_training.xlsx
+  -> iyilesme yok (1/15)
+  -> Epoch 11/150 | LR: 0.004922
+100%|██████████| 1965/1965 [09:51<00:00,  3.32it/s]
+Epoch 12, lr: 0.004922, loss: 0.287423, loss_classifier: 0.004363, loss_box: 0.209294, loss_rpn_box: 0.035518, loss_object: 0.038248
+  Eval (2387 images)...
+
+  Val -> cls:0.0042 box:0.2640 P:0.0738 R:0.2520 mAP50:0.0915 mAP50-95:0.0375
+Metrikler kaydedildi: /home/atp-user-18/Desktop/uc_cihazlarda_terhmal_object_detection/runs/faster_cnn3/fasterrcnn_mobilenet_training.xlsx
+  -> iyilesme yok (2/15)
+  -> Epoch 12/150 | LR: 0.004908
+100%|██████████| 1965/1965 [10:04<00:00,  3.25it/s]
+Epoch 13, lr: 0.004908, loss: 0.292517, loss_classifier: 0.004178, loss_box: 0.216327, loss_rpn_box: 0.034715, loss_object: 0.037298
+  Eval (2387 images)...
+
+  Val -> cls:0.0036 box:0.2772 P:0.0799 R:0.2552 mAP50:0.1047 mAP50-95:0.0469
+Metrikler kaydedildi: /home/atp-user-18/Desktop/uc_cihazlarda_terhmal_object_detection/runs/faster_cnn3/fasterrcnn_mobilenet_training.xlsx
+  -> best.pt (mAP50-95: 0.0469)
+  -> Epoch 13/150 | LR: 0.004894
+100%|██████████| 1965/1965 [10:09<00:00,  3.22it/s]
+Epoch 14, lr: 0.004894, loss: 0.296647, loss_classifier: 0.003927, loss_box: 0.222313, loss_rpn_box: 0.033981, loss_object: 0.036425
+  Eval (2387 images)...
+
+  Val -> cls:0.0035 box:0.2798 P:0.0807 R:0.2572 mAP50:0.1113 mAP50-95:0.0475
+Metrikler kaydedildi: /home/atp-user-18/Desktop/uc_cihazlarda_terhmal_object_detection/runs/faster_cnn3/fasterrcnn_mobilenet_training.xlsx
+  -> best.pt (mAP50-95: 0.0475)
+  -> Epoch 14/150 | LR: 0.004878
+100%|██████████| 1965/1965 [09:33<00:00,  3.43it/s]
+Epoch 15, lr: 0.004878, loss: 0.299910, loss_classifier: 0.003663, loss_box: 0.227334, loss_rpn_box: 0.033361, loss_object: 0.035552
+  Eval (2387 images)...
+
+  Val -> cls:0.0031 box:0.2847 P:0.0838 R:0.2643 mAP50:0.1102 mAP50-95:0.0495
+Metrikler kaydedildi: /home/atp-user-18/Desktop/uc_cihazlarda_terhmal_object_detection/runs/faster_cnn3/fasterrcnn_mobilenet_training.xlsx
+  -> best.pt (mAP50-95: 0.0495)
+  -> Epoch 15/150 | LR: 0.004861
+100%|██████████| 1965/1965 [09:19<00:00,  3.51it/s]
+Epoch 16, lr: 0.004861, loss: 0.303054, loss_classifier: 0.003516, loss_box: 0.231815, loss_rpn_box: 0.032865, loss_object: 0.034857
+  Eval (2387 images)...
+
+  Val -> cls:0.0029 box:0.2955 P:0.0887 R:0.2668 mAP50:0.1262 mAP50-95:0.0561
+Metrikler kaydedildi: /home/atp-user-18/Desktop/uc_cihazlarda_terhmal_object_detection/runs/faster_cnn3/fasterrcnn_mobilenet_training.xlsx
+  -> best.pt (mAP50-95: 0.0561)
+  -> Epoch 16/150 | LR: 0.004844
+100%|██████████| 1965/1965 [09:09<00:00,  3.57it/s]
+Epoch 17, lr: 0.004844, loss: 0.306024, loss_classifier: 0.003359, loss_box: 0.235958, loss_rpn_box: 0.032369, loss_object: 0.034338
+  Eval (2387 images)...
+
+  Val -> cls:0.0030 box:0.2976 P:0.0901 R:0.2663 mAP50:0.1338 mAP50-95:0.0626
+Metrikler kaydedildi: /home/atp-user-18/Desktop/uc_cihazlarda_terhmal_object_detection/runs/faster_cnn3/fasterrcnn_mobilenet_training.xlsx
+  -> best.pt (mAP50-95: 0.0626)
+  -> Epoch 17/150 | LR: 0.004825
+100%|██████████| 1965/1965 [09:27<00:00,  3.46it/s]
+Epoch 18, lr: 0.004825, loss: 0.308838, loss_classifier: 0.003243, loss_box: 0.240011, loss_rpn_box: 0.031912, loss_object: 0.033672
+  Eval (2387 images)...
+
+  Val -> cls:0.0033 box:0.2980 P:0.0916 R:0.2690 mAP50:0.1187 mAP50-95:0.0556
+Metrikler kaydedildi: /home/atp-user-18/Desktop/uc_cihazlarda_terhmal_object_detection/runs/faster_cnn3/fasterrcnn_mobilenet_training.xlsx
+  -> iyilesme yok (1/15)
+  -> Epoch 18/150 | LR: 0.004805
+100%|██████████| 1965/1965 [09:16<00:00,  3.53it/s]
+Epoch 19, lr: 0.004805, loss: 0.311460, loss_classifier: 0.003090, loss_box: 0.243674, loss_rpn_box: 0.031557, loss_object: 0.033139
+  Eval (2387 images)...
+
+  Val -> cls:0.0036 box:0.3076 P:0.0918 R:0.2720 mAP50:0.1324 mAP50-95:0.0635
+Metrikler kaydedildi: /home/atp-user-18/Desktop/uc_cihazlarda_terhmal_object_detection/runs/faster_cnn3/fasterrcnn_mobilenet_training.xlsx
+  -> best.pt (mAP50-95: 0.0635)
+  -> Epoch 19/150 | LR: 0.004784
+100%|██████████| 1965/1965 [09:15<00:00,  3.54it/s]
+Epoch 20, lr: 0.004784, loss: 0.313582, loss_classifier: 0.003033, loss_box: 0.246764, loss_rpn_box: 0.031202, loss_object: 0.032583
+  Eval (2387 images)...
+
+  Val -> cls:0.0027 box:0.3026 P:0.0947 R:0.2764 mAP50:0.1322 mAP50-95:0.0634
+Metrikler kaydedildi: /home/atp-user-18/Desktop/uc_cihazlarda_terhmal_object_detection/runs/faster_cnn3/fasterrcnn_mobilenet_training.xlsx
+  -> iyilesme yok (1/15)
+  -> Epoch 20/150 | LR: 0.004763
+100%|██████████| 1965/1965 [09:59<00:00,  3.28it/s]
+Epoch 21, lr: 0.004763, loss: 0.314560, loss_classifier: 0.003016, loss_box: 0.248344, loss_rpn_box: 0.030894, loss_object: 0.032306
+  Eval (2387 images)...
+
+  Val -> cls:0.0027 box:0.2982 P:0.0961 R:0.2752 mAP50:0.1243 mAP50-95:0.0598
+Metrikler kaydedildi: /home/atp-user-18/Desktop/uc_cihazlarda_terhmal_object_detection/runs/faster_cnn3/fasterrcnn_mobilenet_training.xlsx
+  -> iyilesme yok (2/15)
+  -> Epoch 21/150 | LR: 0.004740
+100%|██████████| 1965/1965 [09:49<00:00,  3.33it/s]
+Epoch 22, lr: 0.004740, loss: 0.316830, loss_classifier: 0.002852, loss_box: 0.251555, loss_rpn_box: 0.030627, loss_object: 0.031795
+  Eval (2387 images)...
+
+  Val -> cls:0.0030 box:0.3192 P:0.1040 R:0.2838 mAP50:0.1594 mAP50-95:0.0807
+Metrikler kaydedildi: /home/atp-user-18/Desktop/uc_cihazlarda_terhmal_object_detection/runs/faster_cnn3/fasterrcnn_mobilenet_training.xlsx
+  -> best.pt (mAP50-95: 0.0807)
+  -> Epoch 22/150 | LR: 0.004716
+100%|██████████| 1965/1965 [09:57<00:00,  3.29it/s]
+Epoch 23, lr: 0.004716, loss: 0.317233, loss_classifier: 0.002731, loss_box: 0.252761, loss_rpn_box: 0.030315, loss_object: 0.031427
+  Eval (2387 images)...
+
+  Val -> cls:0.0027 box:0.3140 P:0.1028 R:0.2813 mAP50:0.1535 mAP50-95:0.0720
+Metrikler kaydedildi: /home/atp-user-18/Desktop/uc_cihazlarda_terhmal_object_detection/runs/faster_cnn3/fasterrcnn_mobilenet_training.xlsx
+  -> iyilesme yok (1/15)
+  -> Epoch 23/150 | LR: 0.004691
+100%|██████████| 1965/1965 [10:03<00:00,  3.26it/s]
+Epoch 24, lr: 0.004691, loss: 0.318100, loss_classifier: 0.002683, loss_box: 0.254209, loss_rpn_box: 0.030104, loss_object: 0.031104
+  Eval (2387 images)...
+
+  Val -> cls:0.0026 box:0.2969 P:0.0980 R:0.2804 mAP50:0.1449 mAP50-95:0.0710
+Metrikler kaydedildi: /home/atp-user-18/Desktop/uc_cihazlarda_terhmal_object_detection/runs/faster_cnn3/fasterrcnn_mobilenet_training.xlsx
+  -> iyilesme yok (2/15)
+  -> Epoch 24/150 | LR: 0.004666
+100%|██████████| 1965/1965 [09:27<00:00,  3.46it/s]
+Epoch 25, lr: 0.004666, loss: 0.319457, loss_classifier: 0.002579, loss_box: 0.256235, loss_rpn_box: 0.029881, loss_object: 0.030763
+  Eval (2387 images)...
+
+  Val -> cls:0.0026 box:0.3151 P:0.1045 R:0.2858 mAP50:0.1658 mAP50-95:0.0832
+Metrikler kaydedildi: /home/atp-user-18/Desktop/uc_cihazlarda_terhmal_object_detection/runs/faster_cnn3/fasterrcnn_mobilenet_training.xlsx
+  -> best.pt (mAP50-95: 0.0832)
+  -> Epoch 25/150 | LR: 0.004639
+100%|██████████| 1965/1965 [09:37<00:00,  3.40it/s]
+Epoch 26, lr: 0.004639, loss: 0.319587, loss_classifier: 0.002538, loss_box: 0.256853, loss_rpn_box: 0.029678, loss_object: 0.030518
+  Eval (2387 images)...
+
+  Val -> cls:0.0030 box:0.3220 P:0.1089 R:0.2879 mAP50:0.1623 mAP50-95:0.0790
+Metrikler kaydedildi: /home/atp-user-18/Desktop/uc_cihazlarda_terhmal_object_detection/runs/faster_cnn3/fasterrcnn_mobilenet_training.xlsx
+  -> iyilesme yok (1/15)
+  -> Epoch 26/150 | LR: 0.004612
+ 86%|████████▌ | 1691/1965 [08:05<01:16,  3.58it/s]

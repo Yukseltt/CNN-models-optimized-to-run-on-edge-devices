@@ -24,7 +24,13 @@ env/
 *.pb
 *.weights
 *.safetensors
-models/*
+models/**/*.pt
+models/**/*.pth
+models/**/*.onnx
+models/**/*.engine
+models/**/*.tflite
+models/**/*.pb
+models/**/*.weights
 models/**/*.safetensors
 
 # Dataset - tamamı ignore
