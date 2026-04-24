@@ -49,3 +49,8 @@ Thumbs.db
 # Logs
 *.log
 logs/
+
+CLAUDE.md
+MEMORY.md
+plan.md
+

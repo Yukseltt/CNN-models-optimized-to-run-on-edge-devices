@@ -1,10 +1,17 @@
 {
   "permissions": {
-    "additionalDirectories": [
-      "/home/ugo/.claude/projects/-home-ugo-Documents-Python-uc-cihaz-obejct-detection-CNN-models-optimized-to-run-on-edge-devices"
-    ],
     "allow": [
-      "Bash(python3 -c ' *)"
+      "Bash(python3 -c ' *)",
+      "Bash(git -C /home/ugo/Documents/Python/uc_cihaz_obejct_detection/CNN-models-optimized-to-run-on-edge-devices status)",
+      "Bash(git -C /home/ugo/Documents/Python/uc_cihaz_obejct_detection/CNN-models-optimized-to-run-on-edge-devices log --oneline -5)",
+      "Bash(python3 -m json.tool)",
+      "Bash(git -C /home/ugo/Documents/Python/uc_cihaz_obejct_detection/CNN-models-optimized-to-run-on-edge-devices log --oneline -20)",
+      "Bash(python3 -c \"import openpyxl; wb = openpyxl.load_workbook\\('/home/ugo/Documents/Python/uc_cihaz_obejct_detection/CNN-models-optimized-to-run-on-edge-devices/models/yolov8/training_results.xlsx'\\); sheet = wb.active; print\\('Sheet name:', sheet.title\\); print\\('Columns:', [cell.value for cell in sheet[1]]\\); print\\('Rows:', sheet.max_row\\)\")",
+      "Bash(.venv/bin/python -c ' *)"
+    ],
+    "additionalDirectories": [
+      "/home/ugo/.claude/projects/-home-ugo-Documents-Python-uc-cihaz-obejct-detection-CNN-models-optimized-to-run-on-edge-devices",
+      "/tmp"
     ]
   }
 }
