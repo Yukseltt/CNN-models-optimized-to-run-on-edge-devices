@@ -1,5 +1,7 @@
-from src.information_dataset import print_stats, display_sample_images
+from src.Quantization.yolo_quantization import Quantization
 
-print_stats()
-display_sample_images("val", num_samples=5)
-
+q1 = Quantization(
+    input_model_path="/home/ugo/Documents/Python/uc_cihaz_obejct_detection/CNN-models-optimized-to-run-on-edge-devices/src/Quantization/Mbest.pt",
+    output_model_path="/home/ugo/Documents/Python/uc_cihaz_obejct_detection/CNN-models-optimized-to-run-on-edge-devices/src/Quantization/Mbest_int8.onnx",
+)
+q1.onnx_ultralytics()
