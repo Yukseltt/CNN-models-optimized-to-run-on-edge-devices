@@ -50,8 +50,8 @@ SUPPORTED_MODELS = {
 DEFAULT_CONFIG = {
     # Yollar
     "ROOT"               : Path("/home/atp-user-18/Desktop/uc_cihazlarda_terhmal_object_detection"),
-    "DATASET_ROOT"       : Path("/home/atp-user-18/Desktop/uc_cihazlarda_terhmal_object_detection/dataset/thermal_yolo"),
-    "EXP_NAME"           : "thermal_yolo",
+    "DATASET_ROOT"       : Path("/home/atp-user-18/Desktop/uc_cihazlarda_terhmal_object_detection/dataset/dataset_augmented_yolo"),
+    "EXP_NAME"           : "thermal_augmented_yolo",
 
     # Model — buradan değiştir: "yolo11n", "yolo12s", "yolov8m" vs.
     "MODEL_KEY"          : "yolo11n",
@@ -101,7 +101,7 @@ def _resolve_config(cfg: dict) -> dict:
     c["DATASET_ROOT"] = Path(c["DATASET_ROOT"])
     c["PROJECT_DIR"]  = str(c["ROOT"] / "runs")
     c["SAVE_DIR"]     = c["ROOT"] / "saved_models"
-    c["yaml_path"]    = "/home/atp-user-18/Desktop/uc_cihazlarda_terhmal_object_detection/dataset/dataset_augmented_yolo/data.yaml"
+    c["yaml_path"]    = str(c["DATASET_ROOT"] / "data.yaml")
 
     model_key = c["MODEL_KEY"].lower()
     if model_key not in SUPPORTED_MODELS:

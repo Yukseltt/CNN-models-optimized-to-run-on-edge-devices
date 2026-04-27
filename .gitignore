@@ -56,3 +56,13 @@ plan.md
 
 .claude/
 .codex
+# YOLO training/validation batch preview images (auto-generated, not informative)
+# YOLO egitim/validation batch onizleme goruntuleri (otomatik uretilir, bilgi degeri yok)
+**/train_batch*.jpg
+**/val_batch*.jpg
+**/train_batch*.png
+**/val_batch*.png
+
+# HuggingFace Trainer checkpoints (huge: optimizer.pt is ~150MB each)
+# HuggingFace Trainer checkpoint'leri (cok buyuk: optimizer.pt ~150MB)
+**/checkpoint-*/
