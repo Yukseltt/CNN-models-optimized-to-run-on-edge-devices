@@ -1,7 +1,7 @@
 # run_training.py
 #
-# Launcher script that starts training with either CB Loss or Focal Loss.
-# CB Loss veya Focal Loss ile egitimi baslatan launcher script.
+# Launcher script that starts training with CB Loss, Focal Loss, or default mode.
+# CB Loss, Focal Loss veya default mode ile egitimi baslatan launcher script.
 #
 # Usage / Kullanim:
 #     python run_training.py
@@ -22,9 +22,9 @@ sys.path.insert(0, str(PROJECT_ROOT))
 sys.path.insert(0, str(Path(__file__).parent))
 
 
-# Loss type selector. Set to "cb" or "focal" before running.
-# Loss tipi seciciyi calistirmadan once "cb" veya "focal" olarak ayarla.
-LOSS_TYPE = "focal"
+# Loss type selector. Set to "cb", "focal" or "default" before running.
+# Loss tipi seciciyi calistirmadan once "cb", "focal" veya "default" olarak ayarla.
+LOSS_TYPE = "default"
 
 
 # Shared / Ortak
@@ -33,13 +33,11 @@ DATA_YAML = "/home/atp-user-18/Desktop/uc_cihazlarda_terhmal_object_detection/da
 
 # CB Loss configuration / CB Loss konfigurasyonu
 
-# Per-class training sample counts in the same order as data.yaml names.
-# data.yaml names sirasi ile ayni sirada per-class egitim ornek sayilari.
 CLASS_COUNTS = [335428, 577119, 36186]
 
 CB_CFG = {
     "BETA":        0.99999999,
-    "NAME":        "yolov8n_cb_beta_0.99999999_augmented_27.04.2026",
+    "NAME":        "yolov8n_cb_beta_0.99999999_augmented_29.04.2026",
     "OUTPUT_XLSX": "training_metrics.xlsx",
 }
 
@@ -49,7 +47,20 @@ CB_CFG = {
 FCL_CFG = {
     "FCL_ALPHA":   0.25,
     "FCL_GAMMA":   2.0,
-    "NAME":        "yolov8n_fcl_alpha_0.25_gamma_2.0_augmented_27.04.2026",
+    "NAME":        "yolov8n_fcl_alpha_0.25_gamma_2.0_augmented_29.04.2026",
+    "OUTPUT_XLSX": "training_metrics.xlsx",
+}
+
+
+# Default configuration / Default konfigurasyon
+#
+# All hyperparameters use Ultralytics defaults.
+# Tum hyperparametreler Ultralytics varsayilanlarini kullanir.
+# Only run name and output filename are overridden.
+# Sadece run ismi ve cikti dosya adi override edilir.
+
+DEFAULT_CFG = {
+    "NAME":        "yolov8n_default_augmented_29.04.2026",
     "OUTPUT_XLSX": "training_metrics.xlsx",
 }
 
@@ -70,7 +81,13 @@ if __name__ == "__main__":
             data=DATA_YAML,
             cfg=FCL_CFG,
         )
+    elif LOSS_TYPE == "default":
+        from train_yolov8_nano_default import train as train_default
+        train_default(
+            data=DATA_YAML,
+            cfg=DEFAULT_CFG,
+        )
     else:
         raise ValueError(
-            f"LOSS_TYPE must be 'cb' or 'focal', got: {LOSS_TYPE!r}"
+            f"LOSS_TYPE must be 'cb', 'focal' or 'default', got: {LOSS_TYPE!r}"
         )

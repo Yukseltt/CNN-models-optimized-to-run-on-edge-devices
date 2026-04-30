@@ -28,6 +28,11 @@ STATIC_HEADERS = [
     "Loss Objectness (Train)",
     "Loss RPN Box Reg (Train)",
     "Total Loss (Train)",
+    "Loss Classifier (Val)",
+    "Loss Box Reg (Val)",
+    "Loss Objectness (Val)",
+    "Loss RPN Box Reg (Val)",
+    "Total Loss (Val)",
     "Precision (Val)", "Recall (Val)", "F1 (Val)",
     "mAP@0.5 (overall)", "mAP@0.5:0.95 (overall)",
 ]
@@ -82,6 +87,21 @@ def _fmt(v) -> Optional[float]:
     return None if v is None else round(float(v), 4)
 
 
+def _sum_loss_components(losses: dict) -> Optional[float]:
+    # Sum loss components, return None if dict is empty or all values None.
+    # Loss component'leri toplar, dict bos veya tum degerler None ise None doner.
+    parts = [
+        losses.get("loss_classifier"),
+        losses.get("loss_box_reg"),
+        losses.get("loss_objectness"),
+        losses.get("loss_rpn_box_reg"),
+    ]
+    valid = [v for v in parts if v is not None]
+    if not valid:
+        return None
+    return sum(valid)
+
+
 # Public API / Genel kullanim.
 
 def build_excel(output_path: Path, class_names: list[str]) -> None:
@@ -114,6 +134,7 @@ def append_epoch_row(
     epoch:             int,
     lr:                float,
     train_losses:      dict,
+    val_losses:        dict,
     val_metrics:       dict,
     per_class_metrics: dict,
     class_names:       list[str],
@@ -123,38 +144,39 @@ def append_epoch_row(
     #
     # Args / Parametreler:
     #     train_losses: dict with keys
-    #         loss_classifier, loss_box_reg, loss_objectness, loss_rpn_box_reg
+    #         loss_classifier, loss_box_reg, loss_objectness, loss_rpn_box_reg.
     #     train_losses: dict, anahtarlar
-    #         loss_classifier, loss_box_reg, loss_objectness, loss_rpn_box_reg
+    #         loss_classifier, loss_box_reg, loss_objectness, loss_rpn_box_reg.
+    #
+    #     val_losses: same structure as train_losses, computed via hybrid forward pass.
+    #     val_losses: train_losses ile ayni yapida, hybrid forward pass ile hesaplanir.
     #
     #     val_metrics: dict with keys precision, recall, f1, map50, map50_95.
     #     val_metrics: dict, anahtarlar precision, recall, f1, map50, map50_95.
     #
-    #     per_class_metrics: dict with class_name -> {map50, map50_95, precision, recall}.
+    #     per_class_metrics: dict, class_name -> {map50, map50_95, precision, recall}.
     #     per_class_metrics: dict, class_name -> {map50, map50_95, precision, recall}.
     wb = openpyxl.load_workbook(output_path)
     ws = wb["Training Metrics"]
     data_row = ws.max_row + 1
     alt_fill = ALT_FILL if data_row % 2 == 0 else None
 
-    cls_t = train_losses.get("loss_classifier")
-    box_t = train_losses.get("loss_box_reg")
-    obj_t = train_losses.get("loss_objectness")
-    rpn_t = train_losses.get("loss_rpn_box_reg")
-
-    total_t = None
-    parts = [v for v in [cls_t, box_t, obj_t, rpn_t] if v is not None]
-    if parts:
-        total_t = sum(parts)
+    train_total = _sum_loss_components(train_losses)
+    val_total   = _sum_loss_components(val_losses)
 
     row = [
         epoch,
         round(lr, 8),
-        _fmt(cls_t),
-        _fmt(box_t),
-        _fmt(obj_t),
-        _fmt(rpn_t),
-        _fmt(total_t),
+        _fmt(train_losses.get("loss_classifier")),
+        _fmt(train_losses.get("loss_box_reg")),
+        _fmt(train_losses.get("loss_objectness")),
+        _fmt(train_losses.get("loss_rpn_box_reg")),
+        _fmt(train_total),
+        _fmt(val_losses.get("loss_classifier")),
+        _fmt(val_losses.get("loss_box_reg")),
+        _fmt(val_losses.get("loss_objectness")),
+        _fmt(val_losses.get("loss_rpn_box_reg")),
+        _fmt(val_total),
         _fmt(val_metrics.get("precision")),
         _fmt(val_metrics.get("recall")),
         _fmt(val_metrics.get("f1")),

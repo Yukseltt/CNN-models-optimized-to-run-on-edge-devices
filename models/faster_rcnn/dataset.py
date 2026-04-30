@@ -143,9 +143,11 @@ class CocoDetectionDataset(Dataset):
         if image is None:
             raise FileNotFoundError(f"Image not readable: {img_path}")
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        
+        # Image size for bbox clipping.
+        # Bbox kirpma icin goruntu boyutu.
+        img_h, img_w = image.shape[:2]
 
-        # Build bbox list in pascal_voc format ([x_min, y_min, x_max, y_max]).
-        # Bbox listesini pascal_voc formatinda olustur ([x_min, y_min, x_max, y_max]).
         anns = self.anns_by_image_id.get(image_id, [])
         boxes: list[list[float]] = []
         labels: list[int] = []
@@ -157,9 +159,19 @@ class CocoDetectionDataset(Dataset):
             # Genisligi veya yuksekligi sifir olan bozuk bbox'leri atla.
             if w <= 0 or h <= 0:
                 continue
-            boxes.append([x, y, x + w, y + h])
+            # Convert to pascal_voc and clip to image bounds.
+            # pascal_voc'a cevir ve goruntu sinirlarina kirp.
+            x_min = max(0.0,         float(x))
+            y_min = max(0.0,         float(y))
+            x_max = min(float(img_w), float(x + w))
+            y_max = min(float(img_h), float(y + h))
+            # Skip if clipping made the box degenerate.
+            # Kirpma sonrasi bbox bozulduysa atla.
+            if x_max <= x_min or y_max <= y_min:
+                continue
+            boxes.append([x_min, y_min, x_max, y_max])
             labels.append(self.cat_id_to_label[ann["category_id"]])
-            areas.append(float(ann.get("area", w * h)))
+            areas.append(float(ann.get("area", (x_max - x_min) * (y_max - y_min))))
             iscrowd.append(int(ann.get("iscrowd", 0)))
 
         # Apply Albumentations transform if provided.
