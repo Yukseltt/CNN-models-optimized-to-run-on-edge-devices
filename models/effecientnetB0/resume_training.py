@@ -1,29 +1,31 @@
-# run_training.py
+# resume_training.py
 #
-# Launcher for EfficientNet-B0 thermal bbox classifier.
-# EfficientNet-B0 termal bbox siniflandirici icin baslatici.
+# Resume launcher for EfficientNet-B0 thermal bbox classifier.
+# EfficientNet-B0 termal bbox siniflandirici icin devam ettirici.
+#
+# Yarida kesilen son egitimi last.pt'den devam ettirir; ayni run klasorune
+# yazmaya devam eder, training_metrics.xlsx dosyasini gunceller.
 #
 # Usage / Kullanim:
-#     python run_training.py
+#     python resume_training.py
 
 import sys
 from pathlib import Path
 
-# Proje kokunu sys.path'e ekle.
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
-
-# Lokal modul import'lari icin mevcut dizini ekle.
 sys.path.insert(0, str(Path(__file__).parent))
 
 from train_efficientnet_b0 import train
 
 
-# Veri dizini.
 DATA_DIR = str(PROJECT_ROOT / "dataset" / "2x_augmented_coco_dataset" / "dataset_augmented")
 
+RESUME_RUN_DIR = PROJECT_ROOT / "runs" / "efficientnet_b0_02.05.20266"
+RESUME_CKPT    = RESUME_RUN_DIR / "last.pt"
 
-# EfficientNet-B0 konfigurasyonu.
+
+# run_training.py ile ayni egitim hiperparametreleri.
 EFFB0_CFG = {
     "EPOCHS":         300,
     "BATCH_SIZE":     128,
@@ -33,8 +35,12 @@ EFFB0_CFG = {
     "USE_AMP":        True,
     "NAME":           "efficientnet_b0_02.05.2026",
     "OUTPUT_XLSX":    "training_metrics.xlsx",
+
+    "RESUME_FROM":    str(RESUME_CKPT),
 }
 
 
 if __name__ == "__main__":
+    if not RESUME_CKPT.exists():
+        raise FileNotFoundError(f"Resume checkpoint not found: {RESUME_CKPT}")
     train(data_dir=DATA_DIR, cfg=EFFB0_CFG)
