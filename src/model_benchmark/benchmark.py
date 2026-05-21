@@ -174,6 +174,8 @@ def main():
                         help="CUDA device")
     parser.add_argument("--skip", nargs="*", default=None,
                         help="Additional directory name patterns to skip")
+    parser.add_argument("--include", nargs="*", default=None,
+                        help="If set, only benchmark these exact directory names")
     args = parser.parse_args()
 
     runs_dir = Path(args.runs_dir)
@@ -217,6 +219,12 @@ def main():
     # Discover models.
     # Modelleri bul.
     run_dirs = discover_runs(runs_dir, skip_patterns)
+
+    # If --include is set, keep only exact matches.
+    # --include verilmisse sadece tam eslesen dizinleri tut.
+    if args.include:
+        run_dirs = [d for d in run_dirs if d.name in args.include]
+
     print(f"\n[Benchmark] Found {len(run_dirs)} models:")
     for d in run_dirs:
         print(f"  - {d.name}")
