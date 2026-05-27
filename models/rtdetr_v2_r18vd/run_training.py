@@ -31,10 +31,11 @@ DATA_DIR = (
     "dataset/2x_augmented_coco_dataset/dataset_augmented"
 )
 
-# Yarim kalan ilk run (480px finetune); best 0.4087 @ epoch 13, step 38000'de devam edecek.
+# Yarim kalan run; Excel son satiri epoch 36.81 step 98000, best 0.5375 @ epoch 27 step 72000.
+# checkpoint-98000'den devam edilir (Excel/best/last ayni run dizinine append).
 EXISTING_CKPT = (
     "/home/atp-user-18/Desktop/uc_cihazlarda_terhmal_object_detection/"
-    "runs/rtdetr_v2_r18vd_from_scratch_26.05.2026/checkpoints/checkpoint-38000"
+    "runs/rtdetr_v2_r18vd_from_scratch_26.05.2026/checkpoints/checkpoint-98000"
 )
 
 # Eski 640px thermal-augmented checkpoint (referans icin tutuldu, kullanilmiyor).
@@ -102,8 +103,9 @@ FINETUNE_CFG = {
 }
 
 
-# Yarim kalan finetune'den (checkpoint-38000) devam.
-# best 0.4087 @ epoch 13. Excel/best/last ayni run dizinine append edilir.
+# Yarim kalan run'dan (checkpoint-98000) devam.
+# Excel son satiri: epoch 36.81 / step 98000. Best: 0.5375 @ epoch 27 / step 72000.
+# Excel/best/last ayni run dizinine append edilir.
 RESUME_CFG = {
     "EPOCHS":              300,         # ilk run'in epoch budget'i ile ayni
     "IMAGE_SIZE":          480,         # ilk run 480px ile egitilmis

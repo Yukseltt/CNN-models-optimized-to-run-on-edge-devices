@@ -22,6 +22,9 @@ import sys
 from pathlib import Path
 from typing import Optional
 
+import json
+
+import openpyxl
 import torch
 from transformers import (
     AutoConfig,
@@ -30,6 +33,7 @@ from transformers import (
     EarlyStoppingCallback,
     Trainer,
     TrainerCallback,
+    TrainerState,
     TrainingArguments,
 )
 
@@ -97,17 +101,55 @@ def _resolve_run_dir(project_dir: str, base_name: str) -> Path:
     return project / f"{base_name}{counter}"
 
 
-class _ExcelLogCallback(TrainerCallback):
-    """Her evaluation'da training_metrics.xlsx'e bir satir yazar."""
+def _read_xlsx_last_progress(xlsx_path: Path) -> tuple[float, int]:
+    """Mevcut xlsx'in son satirindan (epoch, step) doner; bos/yoksa (0.0, 0)."""
+    if not xlsx_path.exists():
+        return 0.0, 0
+    try:
+        wb = openpyxl.load_workbook(xlsx_path, read_only=True, data_only=True)
+        ws = wb["Training Metrics"] if "Training Metrics" in wb.sheetnames else wb.active
+        if ws.max_row < 2:
+            wb.close()
+            return 0.0, 0
+        last = next(ws.iter_rows(min_row=ws.max_row, max_row=ws.max_row, values_only=True))
+        wb.close()
+        ep   = float(last[0]) if last[0] is not None else 0.0
+        step = int(last[1])   if last[1] is not None else 0
+        return ep, step
+    except Exception as e:
+        print(f"[ExcelLog] son satir okunamadi ({e}); offset=0 ile devam.")
+        return 0.0, 0
 
-    def __init__(self, xlsx_path: Path, class_names: list[str]):
-        self.xlsx_path   = Path(xlsx_path)
-        self.class_names = class_names
+
+class _ExcelLogCallback(TrainerCallback):
+    """Her evaluation'da training_metrics.xlsx'e bir satir yazar.
+
+    Resume durumunda Trainer step/epoch counter'i 0'dan baslar; mevcut
+    xlsx'in son satirindaki (epoch, step) offset olarak eklenir ki
+    Excel'deki ilerleme kesintisiz devam etsin.
+    """
+
+    def __init__(
+        self,
+        xlsx_path:     Path,
+        class_names:   list[str],
+        epoch_offset:  float = 0.0,
+        step_offset:   int   = 0,
+    ):
+        self.xlsx_path     = Path(xlsx_path)
+        self.class_names   = class_names
+        self.epoch_offset  = float(epoch_offset)
+        self.step_offset   = int(step_offset)
         self._last_train_loss = None
         self._last_lr = None
         if not self.xlsx_path.exists():
             build_excel(self.xlsx_path, class_names)
         print(f"[ExcelLog] -> {self.xlsx_path}")
+        if self.epoch_offset or self.step_offset:
+            print(
+                f"[ExcelLog] resume offset: epoch+={self.epoch_offset:.4f}, "
+                f"step+={self.step_offset}"
+            )
 
     def on_log(self, args, state, control, logs=None, **kwargs):
         if not logs:
@@ -120,9 +162,11 @@ class _ExcelLogCallback(TrainerCallback):
     def on_evaluate(self, args, state, control, metrics=None, **kwargs):
         if metrics is None:
             return
+        cur_epoch = (state.epoch or 0.0) + self.epoch_offset
+        cur_step  = state.global_step + self.step_offset
         row = build_row(
-            epoch=state.epoch,
-            step=state.global_step,
+            epoch=cur_epoch,
+            step=cur_step,
             lr=self._last_lr,
             train_loss=self._last_train_loss,
             eval_metrics=metrics,
@@ -175,15 +219,17 @@ class _BestLastPtCallback(TrainerCallback):
 
     def __init__(
         self,
-        run_dir:     Path,
-        cfg:         dict,
-        class_names: list[str],
-        metric_key:  str = "eval_map",
+        run_dir:      Path,
+        cfg:          dict,
+        class_names:  list[str],
+        metric_key:   str = "eval_map",
+        epoch_offset: float = 0.0,
     ):
-        self.run_dir     = Path(run_dir)
-        self.cfg         = cfg
-        self.class_names = class_names
-        self.metric_key  = metric_key
+        self.run_dir      = Path(run_dir)
+        self.cfg          = cfg
+        self.class_names  = class_names
+        self.metric_key   = metric_key
+        self.epoch_offset = float(epoch_offset)
         self._best_metric = -1.0
 
     def _snapshot(self, model, epoch, metric):
@@ -199,7 +245,7 @@ class _BestLastPtCallback(TrainerCallback):
         if model is None or metrics is None:
             return
         metric = metrics.get(self.metric_key)
-        epoch  = state.epoch
+        epoch  = (state.epoch or 0.0) + self.epoch_offset
 
         last_path = self.run_dir / "last.pt"
         torch.save(self._snapshot(model, epoch, metric), last_path)
@@ -209,6 +255,44 @@ class _BestLastPtCallback(TrainerCallback):
             best_path = self.run_dir / "best.pt"
             torch.save(self._snapshot(model, epoch, metric), best_path)
             print(f"[BestLast] NEW BEST {self.metric_key}={metric:.4f} -> {best_path.name}")
+
+
+class _ResumeStateTrainer(Trainer):
+    """Trainer alt sinifi: resume'da sadece trainer_state.json'dan
+    global_step / epoch'u alir; model'in kendisini ve optimizer/scheduler/RNG'yi
+    yuklemez (model dis taraftan from_pretrained ile dogru sekilde yuklenmistir).
+
+    Boylece eski transformers semasiyla kaydedilmis checkpoint'lerin
+    state_dict key mismatch sorunundan etkilenmeden, Trainer progress
+    counter'i dogru epoch/step'ten devam eder.
+    """
+
+    def __init__(self, *args, resume_state_path: Optional[str] = None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._resume_state_path = resume_state_path
+
+    def _load_from_checkpoint(self, resume_from_checkpoint, model=None):
+        # Model agirliklarini yeniden yukleme — disarida from_pretrained
+        # zaten dogru key conversion'la yukledi.
+        return
+
+    def _load_optimizer_and_scheduler(self, checkpoint):
+        # Optimizer/scheduler/RNG yuklemesini atla — fresh basla.
+        return
+
+    def _load_rng_state(self, checkpoint):
+        return
+
+
+def _read_trainer_state(state_json_path: Path) -> tuple[float, int]:
+    """trainer_state.json'dan (epoch, global_step) doner."""
+    try:
+        with open(state_json_path) as f:
+            st = json.load(f)
+        return float(st.get("epoch", 0.0) or 0.0), int(st.get("global_step", 0) or 0)
+    except Exception as e:
+        print(f"[Resume] trainer_state.json okunamadi ({e}); 0'dan baslanir.")
+        return 0.0, 0
 
 
 def _load_initial_best(run_dir: Path, metric_key: str = "eval_map") -> float:
@@ -409,8 +493,34 @@ def train(data_dir: str, cfg: Optional[dict] = None) -> None:
         seed                        = c["SEED"],
     )
 
-    excel_cb = _ExcelLogCallback(run_dir / "training_metrics.xlsx", class_names)
-    bestlast_cb = _BestLastPtCallback(run_dir, c, class_names)
+    # Resume mantigi:
+    #   - Model agirliklari: from_pretrained(RESUME_FROM) ile dogru key
+    #     conversion uygulanarak zaten yuklendi (yukarida).
+    #   - trainer_state.json'dan global_step/epoch okunur ve Trainer state'ine
+    #     enjekte edilir; boylece progress bar/eval_steps tetikleyici tutarli olur.
+    #   - Optimizer/scheduler/RNG fresh — bilinen tradeoff.
+    # state.global_step zaten dogru baslayacagi icin Excel offset'i 0.
+    epoch_offset, step_offset = 0.0, 0
+    resume_state_path = None
+    if is_resume:
+        st_json = Path(c["RESUME_FROM"]) / "trainer_state.json"
+        if st_json.exists():
+            resume_state_path = str(st_json)
+            ep, gs = _read_trainer_state(st_json)
+            print(f"[Resume] trainer_state.json: epoch={ep:.4f} global_step={gs}")
+        else:
+            print(f"[Resume] trainer_state.json yok ({st_json}); Excel'in son satirindan offset alinacak.")
+            epoch_offset, step_offset = _read_xlsx_last_progress(
+                run_dir / "training_metrics.xlsx"
+            )
+
+    excel_cb = _ExcelLogCallback(
+        run_dir / "training_metrics.xlsx", class_names,
+        epoch_offset=epoch_offset, step_offset=step_offset,
+    )
+    bestlast_cb = _BestLastPtCallback(
+        run_dir, c, class_names, epoch_offset=epoch_offset,
+    )
     bestlast_cb._best_metric = _load_initial_best(run_dir)
     early_cb = EarlyStoppingCallback(early_stopping_patience=c["PATIENCE"])
 
@@ -418,7 +528,8 @@ def train(data_dir: str, cfg: Optional[dict] = None) -> None:
         image_processor=image_processor, threshold=0.0, id2label=id2label,
     )
 
-    trainer = Trainer(
+    trainer_cls = _ResumeStateTrainer if is_resume else Trainer
+    trainer_kwargs = dict(
         model=model,
         args=training_args,
         train_dataset=train_ds,
@@ -436,15 +547,22 @@ def train(data_dir: str, cfg: Optional[dict] = None) -> None:
             ),
         ],
     )
-
-    # Resume: model agirliklarini RESUME_FROM'dan yukledik (yukarida).
-    # trainer.resume_from_checkpoint KULLANMA — optimizer.pt yuklemesi
-    # torch<2.6 + transformers>=5.5 + CVE-2025-32434 yuzunden patliyor.
-    # Tradeoff: optimizer momentum/LR schedule/step counter resetlenir;
-    # model agirliklari devam eder, Excel/best/last ayni dosyada append edilir.
     if is_resume:
-        print(f"[RT-DETR] Egitim basliyor (weights resumed, optimizer reset)...\n")
-        trainer.train()
+        trainer_kwargs["resume_state_path"] = resume_state_path
+    trainer = trainer_cls(**trainer_kwargs)
+
+    # Resume: trainer.train(resume_from_checkpoint=path) cagrilir, ama
+    # _ResumeStateTrainer subclass'i model/optimizer/scheduler/RNG yuklemesini
+    # atlar. HF Trainer trainer_state.json'dan state'i yine de okur — bu
+    # sayede state.global_step ve state.epoch dogru baslar, progress bar
+    # dogru ilerler, eval_steps tetikleyici tutarli kalir.
+    # Model agirliklari zaten from_pretrained ile yuklendi.
+    if is_resume:
+        print(
+            f"[RT-DETR] Egitim basliyor (state resume from {c['RESUME_FROM']}, "
+            "optimizer/scheduler fresh)...\n"
+        )
+        trainer.train(resume_from_checkpoint=c["RESUME_FROM"])
     else:
         print(f"[RT-DETR] Egitim basliyor (fresh)...\n")
         trainer.train()
