@@ -26,11 +26,13 @@ SKIP = ("model.0.", "model.23.", ".dfl.")
 # her katmana deneyecegimiz oranlar
 ORANLAR = [0.1, 0.2, 0.3, 0.5]
 
-# kac mAP dususu kabul ediyoruz
-TOLERANS = 0.02
-
-# Sensitivity 0.0 dediyse 0.0 kalir. Debug icin >0 yap, normalde 0.0
-MIN_FLOOR = 0.0
+# Her prunable katman icin GARANTI minimum kesim orani.
+# DIKKAT: 0.0 + "drop <= tolerans" mantigi = HICBIR sey kesilmez (model kuculmez),
+# cunku structured pruning fine-tune'dan ONCE mAP'i her zaman cok dusurur.
+# Fine-tune ile telafi edecegimiz icin tabani >0 tut (0.10-0.20 mantikli).
+MIN_FLOOR = 0.10
+# Az hassas katmana izin verilen en yuksek oran (sensitivity'ye gore MIN_FLOOR..MAX_CEIL).
+MAX_CEIL = 0.40
 
 # ---- TEST MODE ----
 # Kisa duman testi: az katman + tek oran + val subset. Kapatmak icin asagidaki satiri yorum yap.
@@ -145,27 +147,40 @@ with open(OUT / "sensitivity.json", "w") as f:
 
 
 # ==========================================================
-# 3) BUTCE: her katman icin dususu TOLERANS altinda kalan en yuksek oran
+# 3) BUTCE: sensitivity'ye gore per-layer kesim orani
 # ==========================================================
+# NEDEN ESKI KOD MODELI KUCULTMUYORDU:
+#   Eski mantik "mAP dususu <= TOLERANS (0.02) olan en buyuk orani sec" idi.
+#   Ama structured pruning fine-tune'dan ONCE her zaman mAP'i ciddi dusurur:
+#   tek katmani %30 kesince mAP 0.30-0.57 dusuyor (sensitivity.json). Hicbir
+#   katman 0.02 esiginin altina inmedigi icin butce HER katmana 0.0 veriyordu
+#   -> ratio_dict bos -> torch_pruning hicbir kanali kesmiyor -> AYNI boyut.
+#
+#   Dogru yaklasim: sensitivity ile katmanlari SIRALA, garanti taban (MIN_FLOOR)
+#   ile kes, sonra fine-tune ile mAP'i geri kazan. Az hassas katmani cok, cok
+#   hassas katmani az kes (MIN_FLOOR..MAX_CEIL araliginda).
 print("=" * 60)
-print("3) BUTCE")
+print("3) BUTCE (sensitivity-ranked)")
 print("=" * 60)
+
+# sensitivity skoru: swept katmanlarin ortalama mAP dususu (yuksek = daha hassas)
+skor = {n: sum(v.values()) / len(v) for n, v in sensitivity.items() if v}
+s_min = min(skor.values()) if skor else 0.0
+s_max = max(skor.values()) if skor else 0.0
 
 butce = {}
 for name in prunable_isimler:
-    secilen = 0.0
-    # TEST_MODE: sweep edilmemis katmanlar icin sensitivity yok -> 0.0
-    if name not in sensitivity:
-        butce[name] = 0.0
-        continue
-    # kucukten buyuge dene, tolerans gecince dur
-    for oran in sorted(sensitivity[name].keys()):
-        if sensitivity[name][oran] <= TOLERANS:
-            secilen = oran
-        else:
-            break
-    butce[name] = secilen
-    print(name, "->", secilen)
+    if name in skor and s_max > s_min:
+        # az hassas (dusuk skor) -> MAX_CEIL'e yakin; cok hassas -> MIN_FLOOR'a yakin
+        norm = (skor[name] - s_min) / (s_max - s_min)          # 0..1
+        oran = MAX_CEIL - norm * (MAX_CEIL - MIN_FLOOR)
+    else:
+        # sweep edilmemis (TEST_MODE) katman -> guvenli taban
+        oran = MIN_FLOOR
+    oran = round(round(oran / 0.05) * 0.05, 2)                 # 0.05'lik adimlara yuvarla
+    butce[name] = float(oran)
+    skor_str = f"{skor[name]:.3f}" if name in skor else "n/a"
+    print(f"{name} -> {oran:.2f}  (sensitivity skoru={skor_str})")
 
 with open(OUT / "butce.json", "w") as f:
     json.dump(butce, f, indent=2)
@@ -204,6 +219,11 @@ for name in prunable_isimler:
         non_zero += 1
 
 print("efektif kesim hedefi:", non_zero, "katman")
+if non_zero == 0:
+    raise RuntimeError(
+        "ratio_dict BOS -> hicbir kanal kesilmeyecek, model kuculmez. "
+        f"MIN_FLOOR > 0 oldugundan emin ol (su an {MIN_FLOOR})."
+    )
 
 # kesim oncesi conv shape snapshot (dogrulama)
 shape_before = {n: m.weight.shape for n, m in yolo.model.named_modules()
