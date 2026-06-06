@@ -379,10 +379,20 @@ if __name__ == "__main__":
     # fresh from yolo11n.pt.
     # Yarida kalan bir kosuyu surdurmek icin `last.pt` yolu ver; bostan
     # baslamak icin None birak.
-    RESUME_FROM: Optional[str] = (
-        "/home/atp-user-18/Desktop/uc_cihazlarda_terhmal_object_detection/"
-        "runs/yolo11n_cb_beta_0.99999999_augmented/weights/last.pt"
-    )
+    #
+    # IMPORTANT: Ultralytics strips optimizer/epoch state from last.pt once
+    # training completes (patience early-stop or epochs done). After that,
+    # resume is impossible — Ultralytics silently falls back to "fresh train
+    # with default config" (coco8.yaml, nc=80) and the CB callback's nc=3
+    # class_weights cause a tensor mismatch. Always verify the run is truly
+    # incomplete before pointing RESUME_FROM at a last.pt.
+    # ONEMLI: Ultralytics egitim tamamlandiginda (patience early-stop veya
+    # tum epoch'lar bitince) last.pt'den optimizer/epoch state'i siler.
+    # Bundan sonra resume imkansiz — Ultralytics sessizce default config
+    # (coco8.yaml, nc=80) ile fresh training'e duser ve CB callback'in nc=3
+    # class_weights'i tensor mismatch verir. RESUME_FROM'u set etmeden once
+    # kosunun gercekten yarida kaldigindan emin ol.
+    RESUME_FROM: Optional[str] = None
 
     train(
         data=DATA_YAML,
