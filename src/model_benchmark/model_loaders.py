@@ -129,7 +129,7 @@ def load_torchvision(best_pt: Path, family: str, device: str = "cuda:0"):
     # (background slot, sigmoid-head detector'lar icin bile).
     num_classes = len(class_names) + 1
 
-    backbone   = cfg.get("BACKBONE", "resnet50")
+    backbone   = cfg.get("BACKBONE") or cfg.get("STUDENT_BACKBONE") or "resnet50"
     pretrained = cfg.get("PRETRAINED", "coco")
 
     model = create_fn(
