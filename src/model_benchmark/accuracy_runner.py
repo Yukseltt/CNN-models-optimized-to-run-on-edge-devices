@@ -73,7 +73,7 @@ def _yolo_predictions_to_coco(results, coco_gt) -> list:
         for i in range(len(xyxy)):
             x1, y1, x2, y2 = xyxy[i]
             yolo_cls = int(cls[i])
-            cat_id = yolo_to_coco.get(yolo_cls, yolo_cls)
+            cat_id = yolo_cls  # direct: YOLO index == COCO id (verified)
 
             coco_results.append({
                 "image_id":    int(img_id),

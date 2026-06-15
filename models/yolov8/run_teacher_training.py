@@ -17,7 +17,7 @@ from train_yolov8_large_default import train as train_large
 
 
 # Shared / Ortak
-DATA_YAML = "/home/atp-user-18/Desktop/uc_cihazlarda_terhmal_object_detection/dataset/2x_augmented_yolo_dataset/dataset_augmented_yolo/data.yaml"
+DATA_YAML = "/home/atp-user-18/Desktop/uc_cihazlarda_terhmal_object_detection/dataset/restratified_yolo/data.yaml"
 
 
 # Teacher configuration / Teacher konfigurasyonu
@@ -29,7 +29,7 @@ DATA_YAML = "/home/atp-user-18/Desktop/uc_cihazlarda_terhmal_object_detection/da
 
 TEACHER_CFG = {
     "BATCH_SIZE":  8,
-    "NAME":        "yolov8l_teacher_default_13.06.2026",
+    "NAME":        "yolov8l_restratified_test_14.06.2026",
     "OUTPUT_XLSX": "training_metrics.xlsx",
 }
 
