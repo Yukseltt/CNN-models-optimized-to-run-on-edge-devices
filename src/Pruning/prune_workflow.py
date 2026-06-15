@@ -197,6 +197,12 @@ print("=" * 60)
 yolo = YOLO(MODEL_PATH)
 yolo.model.to(DEVICE).eval()
 
+# KRITIK: ultralytics ckpt'i inference icin yukler -> tum param requires_grad=False.
+# torch_pruning DepGraph bagimliligi AUTOGRAD ile trace eder; grad kapali olunca
+# graf bos kalir (88 conv'dan sadece 1 yakalanir) -> hicbir kanal kesilmez.
+# Trace icin gradi acmak SART.
+yolo.model.requires_grad_(True)
+
 ornek_input = torch.randn(1, 3, IMG, IMG).to(DEVICE)
 yolo.model.eval()
 

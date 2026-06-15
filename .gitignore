@@ -53,6 +53,7 @@ logs/
 CLAUDE.md
 MEMORY.md
 plan.md
+/graphify-out
 
 .claude/
 .codex
@@ -66,3 +67,5 @@ plan.md
 # HuggingFace Trainer checkpoints (huge: optimizer.pt is ~150MB each)
 # HuggingFace Trainer checkpoint'leri (cok buyuk: optimizer.pt ~150MB)
 **/checkpoint-*/
+
+NOTEBOOKLM_TEZ_KAYNAK.md

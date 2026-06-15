@@ -26,7 +26,7 @@ for name, layer in prunable:
     print(name, layer.weight.shape)
 
 layer = model.model.model[1].conv   # Conv2d([128, 64, 3, 3])
-print(layer.name)
+print(layer.weight.shape)
 # L2 norm en düşük %30 output filter sıfırla (dim=0 = out_channels)
 prune.ln_structured(layer, name="weight", amount=0.1, n=2, dim=0)
 
