@@ -24,12 +24,15 @@ from train_detr import train
 #   "finetune"     - HF Hub'tan pretrained agirliklarla baslar (transfer learning).
 #   "resume"       - Yarida kalan bir run'dan devam et (RESUME_CFG icine
 #                    kendi checkpoint dizinini gir).
-RUN_TYPE = "resume"
-
+RUN_TYPE = sys.argv[1] if len(sys.argv) > 1 else "finetune"
 
 DATA_DIR = (
     "/home/atp-user-18/Desktop/uc_cihazlarda_terhmal_object_detection/"
-    "dataset/2x_augmented_coco_dataset/dataset_augmented"
+    "dataset/restratified_coco"
+)
+
+RUNS_NEW = (
+    "/home/atp-user-18/Desktop/uc_cihazlarda_terhmal_object_detection/runs_new"
 )
 
 # Resume etmek istersen kendi checkpoint-N dizinini buraya yaz.
@@ -81,20 +84,23 @@ FROM_SCRATCH_CFG = {
 FINETUNE_CFG = {
     "EPOCHS":              150,
     "IMAGE_SIZE":          480,
-    "PER_DEVICE_TRAIN_BS": 16,
+    "PER_DEVICE_TRAIN_BS": 32,
     "PER_DEVICE_EVAL_BS":  32,
     "GRAD_ACCUM":          1,
-    "LR":                  1e-4,
+    "LR":                  1e-4,    # DETR paper LR — do NOT scale with batch (AdamW normalizes grad)
     "WARMUP_STEPS":        500,
     "PATIENCE":            20,
     "WORKERS":             6,
     "PREFETCH_FACTOR":     2,
     "EVAL_ACCUM_STEPS":    4,
     "EVAL_STEPS":          2000,
-    "COMPILE":             False,    # DETR (classic) encoder ile uyumsuz; deneme icin True yap
-    "NAME":                "detr_finetune_29.05.2026",
+    "COMPILE":             False,
+    "PRECISION":           "fp32",   # fp16 degenerate boxes crash giou at high grad_norm
+    "PROJECT":             RUNS_NEW,
+    "NAME":                "detr_finetune_restratified_01.07.2026",
     "RESUME_FROM":         None,
     "FROM_SCRATCH":        False,
+    "SKIP_CONFIRM":        True,
 }
 
 

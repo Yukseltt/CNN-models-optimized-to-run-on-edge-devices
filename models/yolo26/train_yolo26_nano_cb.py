@@ -163,7 +163,7 @@ class CBTrainingCallbacks:
         f1 = (2 * prec * rec / (prec + rec)) if prec and rec and (prec + rec) > 0 else 0.0
 
         per_class = self._collect_per_class(trainer)
-        row = [epoch, round(lr_val, 8), _fmt(box_t), _fmt(box_v), _fmt(cls_t), _fmt(cls_v), _fmt(dfl_t), _fmt(dfl_v), _fmt(prec), _fmt(rec), _fmt(f1), _fmt(map50), _fmt(map50_95)]
+        row = [(epoch + 1), round(lr_val, 8), _fmt(box_t), _fmt(box_v), _fmt(cls_t), _fmt(cls_v), _fmt(dfl_t), _fmt(dfl_v), _fmt(prec), _fmt(rec), _fmt(f1), _fmt(map50), _fmt(map50_95)]
         for i in range(len(self.class_names)):
             row.extend([_fmt(per_class["map50"][i]), _fmt(per_class["map50_95"][i]), _fmt(per_class["precision"][i]), _fmt(per_class["recall"][i])])
 
@@ -175,14 +175,27 @@ class CBTrainingCallbacks:
         nc = len(self.class_names)
         res = {"map50": [None]*nc, "map50_95": [None]*nc, "precision": [None]*nc, "recall": [None]*nc}
         try:
-            box = trainer.validator.metrics.box
-            for pos, cls_idx in enumerate(box.ap_class_index):
+            validator = getattr(trainer, "validator", None)
+            if validator is None: return res
+            v_metrics = getattr(validator, "metrics", None)
+            if v_metrics is None: return res
+            box = getattr(v_metrics, "box", None)
+            if box is None: return res
+            ap_class_index = getattr(box, "ap_class_index", None)
+            if ap_class_index is None or len(ap_class_index) == 0: return res
+            ap50_arr = getattr(box, "ap50", None)
+            maps     = getattr(box, "maps", None)
+            p_arr    = getattr(box, "p", None)
+            # box.r per-class recall array; box.recall scalar olabilir, once r dene
+            r_arr = getattr(box, "r", None)
+            if r_arr is None: r_arr = getattr(box, "recall", None)
+            if r_arr is not None and not hasattr(r_arr, "__len__"): r_arr = None
+            for pos, cls_idx in enumerate(ap_class_index):
                 cls_idx = int(cls_idx)
                 if cls_idx >= nc: continue
-                if box.ap50 is not None and pos < len(box.ap50): res["map50"][cls_idx] = box.ap50[pos]
-                if box.maps is not None and cls_idx < len(box.maps): res["map50_95"][cls_idx] = box.maps[cls_idx]
-                if box.p is not None and pos < len(box.p): res["precision"][cls_idx] = box.p[pos]
-                r_arr = box.recall if box.recall is not None else box.r
+                if ap50_arr is not None and pos < len(ap50_arr): res["map50"][cls_idx] = ap50_arr[pos]
+                if maps is not None and cls_idx < len(maps): res["map50_95"][cls_idx] = maps[cls_idx]
+                if p_arr is not None and pos < len(p_arr): res["precision"][cls_idx] = p_arr[pos]
                 if r_arr is not None and pos < len(r_arr): res["recall"][cls_idx] = r_arr[pos]
         except Exception: pass
         return res

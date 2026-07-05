@@ -1,0 +1,19 @@
+{
+  "body.conv1": 0.1,
+  "body.layer1.0.conv2": 0.4,
+  "body.layer1.1.conv2": 0.4,
+  "body.layer1.2.conv2": 0.4,
+  "body.layer2.0.conv2": 0.35,
+  "body.layer2.1.conv2": 0.4,
+  "body.layer2.2.conv2": 0.4,
+  "body.layer2.3.conv2": 0.4,
+  "body.layer3.0.conv2": 0.4,
+  "body.layer3.1.conv2": 0.4,
+  "body.layer3.2.conv2": 0.4,
+  "body.layer3.3.conv2": 0.4,
+  "body.layer3.4.conv2": 0.4,
+  "body.layer3.5.conv2": 0.4,
+  "body.layer4.0.conv2": 0.4,
+  "body.layer4.1.conv2": 0.4,
+  "body.layer4.2.conv2": 0.4
+}

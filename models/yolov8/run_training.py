@@ -22,46 +22,38 @@ sys.path.insert(0, str(PROJECT_ROOT))
 sys.path.insert(0, str(Path(__file__).parent))
 
 
-# Loss type selector. Set to "cb", "focal" or "default" before running.
-# Loss tipi seciciyi calistirmadan once "cb", "focal" veya "default" olarak ayarla.
-LOSS_TYPE = "default"
-
+# Komut satirindan secim: python run_training.py default|cb|focal
+LOSS_TYPE = sys.argv[1] if len(sys.argv) > 1 else "default"
 
 # Shared / Ortak
-DATA_YAML = "/home/atp-user-18/Desktop/uc_cihazlarda_terhmal_object_detection/dataset/2x_augmented_yolo_dataset/dataset_augmented_yolo/data.yaml"
+DATA_YAML = "/home/atp-user-18/Desktop/uc_cihazlarda_terhmal_object_detection/dataset/restratified_yolo/data.yaml"
+RUNS_NEW  = str(PROJECT_ROOT / "runs_new")
 
-
-# CB Loss configuration / CB Loss konfigurasyonu
-
-CLASS_COUNTS = [335428, 577119, 36186]
+# CB Loss configuration
+# CLASS_COUNTS: restratified train set icin (person / car / other_vehicle)
+CLASS_COUNTS = [207400, 319437, 27099]
 
 CB_CFG = {
     "BETA":        0.99999999,
-    "NAME":        "yolov8n_cb_beta_0.99999999_augmented_29.04.2026",
+    "NAME":        "yolov8n_cb_beta_0.99999999_restratified_01.07.2026",
     "OUTPUT_XLSX": "training_metrics.xlsx",
+    "PROJECT":     RUNS_NEW,
 }
 
-
-# Focal Loss configuration / Focal Loss konfigurasyonu
-
+# Focal Loss configuration
 FCL_CFG = {
     "FCL_ALPHA":   0.25,
     "FCL_GAMMA":   2.0,
-    "NAME":        "yolov8n_fcl_alpha_0.25_gamma_2.0_augmented_29.04.2026",
+    "NAME":        "yolov8n_fcl_alpha_0.25_gamma_2.0_restratified_01.07.2026",
     "OUTPUT_XLSX": "training_metrics.xlsx",
+    "PROJECT":     RUNS_NEW,
 }
 
-
-# Default configuration / Default konfigurasyon
-#
-# All hyperparameters use Ultralytics defaults.
-# Tum hyperparametreler Ultralytics varsayilanlarini kullanir.
-# Only run name and output filename are overridden.
-# Sadece run ismi ve cikti dosya adi override edilir.
-
+# Default configuration
 DEFAULT_CFG = {
-    "NAME":        "yolov8n_default_augmented_29.04.2026",
+    "NAME":        "yolov8n_default_restratified_01.07.2026",
     "OUTPUT_XLSX": "training_metrics.xlsx",
+    "PROJECT":     RUNS_NEW,
 }
 
 

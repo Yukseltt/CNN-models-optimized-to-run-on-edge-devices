@@ -26,11 +26,11 @@ from train_yolo_fir import train
 #   "default"  - YOLOv5su base + FIR-paper-inspired config
 #   "resume"   - resume an interrupted run from last.pt
 
-RUN_TYPE = "default"
+RUN_TYPE = "resume"
 
 
 # Shared / Ortak
-DATA_YAML = "/home/atp-user-18/Desktop/uc_cihazlarda_terhmal_object_detection/dataset/2x_augmented_yolo_dataset/dataset_augmented_yolo/data.yaml"
+DATA_YAML = "/home/atp-user-18/Desktop/uc_cihazlarda_terhmal_object_detection/dataset/restratified_yolo/data.yaml"
 
 
 # Default FIR config / Varsayilan FIR config.
@@ -38,7 +38,7 @@ DEFAULT_CFG = {
     "EPOCHS":      100,
     "BATCH_SIZE":  32,
     "PATIENCE":    30,
-    "NAME":        "yolo_fir_v5s_28.05.2026",
+    "NAME":        "yolo_fir_16.06.2026",
     "OUTPUT_XLSX": "training_metrics.xlsx",
 }
 
@@ -48,9 +48,9 @@ RESUME_CFG = {
     "EPOCHS":       100,
     "BATCH_SIZE":   32,
     "PATIENCE":     30,
-    "NAME":         "yolo_fir_v5s_28.05.2026",
+    "NAME":         "yolo_fir_16.06.2026",
     "OUTPUT_XLSX":  "training_metrics.xlsx",
-    "RESUME_FROM":  str(PROJECT_ROOT / "runs" / "yolo_fir_v5s_28.05.2026" / "weights" / "last.pt"),
+    "RESUME_FROM":  str(PROJECT_ROOT / "runs_new" / "yolo_fir_16.06.2026" / "weights" / "last.pt"),
 }
 
 

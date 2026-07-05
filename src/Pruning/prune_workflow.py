@@ -2,9 +2,15 @@
 # Hoca: structured pruning yap, sensitivity bak, fine-tune et, mAP karsilastir
 # Kutuphane: torch_pruning (DepGraph) - kanali fiziksel kesiyor
 
+import os
+import gc
 import json
 import torch
 import torch.nn as nn
+import torch.multiprocessing as mp
+# bu host'ta DataLoader worker'lari + paylasimli bellek FD'leri tuketip EMFILE veriyor;
+# fine-tune egitiminden once file_system stratejisi sart (yoksa egitim takilir/coker).
+mp.set_sharing_strategy("file_system")
 import torch.nn.utils.prune as nnp   # mask tabanli (sensitivity icin)
 import torch_pruning as tp           # gercek kesim icin
 from ultralytics import YOLO
@@ -12,16 +18,17 @@ from pathlib import Path
 
 
 # ---- ayarlar ----
-MODEL_PATH = "runs/sayzek_runs_yolo11_base_param/yolo11n_base_param12/weights/best.pt"
-DATA_YAML = "/home/ugo/Documents/Python/uc_cihaz_obejct_detection/CNN-models-optimized-to-run-on-edge-devices/dataset/dataset_augmented_yolo_23.04.2026/dataset_augmented_yolo/data.yaml"
+MODEL_PATH = "/home/atp-user-18/Desktop/uc_cihazlarda_terhmal_object_detection/runs/yolo_fir_v5s_28.05.2026/weights/best.pt"
+DATA_YAML = "/home/atp-user-18/Desktop/uc_cihazlarda_terhmal_object_detection/dataset/2x_augmented_yolo_dataset/dataset_augmented_yolo/data.yaml"
 IMG = 640
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
-OUT = Path("runs/sayzek_runs_yolo11_base_param_puring")
+OUT = Path("/home/atp-user-18/Desktop/uc_cihazlarda_terhmal_object_detection/runs_pruing")
 OUT.mkdir(parents=True, exist_ok=True)
 
-# bunlara dokunmuyoruz: ilk conv (model.0) ve detect head (model.23)
+# bunlara dokunmuyoruz: ilk conv (model.0) ve detect head (model.24)
+# NOT: bu model yolov5su -> Detect head index'i model.24 (yolo11'de model.23 idi)
 # NOT: ".cv2." / ".cv3." pattern KULLANMA - C2f/C3k2 govde conv'larini da yakalar
-SKIP = ("model.0.", "model.23.", ".dfl.")
+SKIP = ("model.0.", "model.24.", ".dfl.")
 
 # her katmana deneyecegimiz oranlar
 ORANLAR = [0.1, 0.2, 0.3, 0.5]
@@ -36,7 +43,7 @@ MAX_CEIL = 0.40
 
 # ---- TEST MODE ----
 # Kisa duman testi: az katman + tek oran + val subset. Kapatmak icin asagidaki satiri yorum yap.
-TEST_MODE = True   # <-- kapatmak icin bu satiri yorumla (veya False yap)
+TEST_MODE = False   # <-- kapatmak icin bu satiri yorumla (veya False yap)
 
 if "TEST_MODE" in globals() and TEST_MODE:
     ORANLAR = [0.3]              # tek oran
@@ -137,7 +144,12 @@ for name in sweep_isimler:
         sensitivity[name][oran] = dusus
         print(name, "oran=", oran, "mAP=", round(m, 4), "dusus=", round(dusus, 4))
 
-        del yolo_temp
+        # KRITIK: del tek basina yetmez. YOLO modeli <-> validator <-> dataloader
+        # arasinda ref dongusu var; saf refcount bunu hemen bosaltmaz -> her
+        # iterasyonda VRAM/RAM birikir ("vram surekli artiyor"). gc.collect()
+        # donguleri kirar, empty_cache() suruculuye geri verir.
+        del yolo_temp, layer, modul_dict, s
+        gc.collect()
         if DEVICE == "cuda":
             torch.cuda.empty_cache()
 
@@ -197,14 +209,15 @@ print("=" * 60)
 yolo = YOLO(MODEL_PATH)
 yolo.model.to(DEVICE).eval()
 
-# KRITIK: ultralytics ckpt'i inference icin yukler -> tum param requires_grad=False.
-# torch_pruning DepGraph bagimliligi AUTOGRAD ile trace eder; grad kapali olunca
-# graf bos kalir (88 conv'dan sadece 1 yakalanir) -> hicbir kanal kesilmez.
-# Trace icin gradi acmak SART.
-yolo.model.requires_grad_(True)
-
 ornek_input = torch.randn(1, 3, IMG, IMG).to(DEVICE)
 yolo.model.eval()
+
+# KRITIK: ultralytics inference ckpt'ini parametreleri DONMUS (requires_grad=False)
+# yukler. torch_pruning bagimlilik grafigini autograd grad_fn uzerinden kurar; grad
+# akmazsa graf baglanmaz (module2node=1) -> get_all_groups()=0 -> hicbir kanal kesilmez
+# ("shape degisen conv: 0"). Trace oncesi gradi acmak grafigin tamamini olusturur.
+for p in yolo.model.parameters():
+    p.requires_grad_(True)
 
 # skip listesindeki katmanlari ve detect head Conv'larini ignore et
 ignored_layers = []
@@ -282,20 +295,49 @@ print("KESIM SONRASI MACs          =", yeni_macs / 1e9, "G")
 # 5) FINE-TUNE
 # kesim sonrasi mAP duser, kucuk lr ile birkac epoch egit
 # ==========================================================
-#print("=" * 60)
-#print("5) FINE-TUNE")
-#print("=" * 60)
+# DIKKAT: yolo.train() modeli self.model.yaml'dan YENIDEN kurar (get_model).
+# YOLO yaml'i depth/width carpanlari + modul listesi tutar, kesilmis kanal
+# sayilarini DEGIL -> pruned yapi KAYBOLUR, model 9.12M'e geri doner ve kesim
+# bosa gider. Cozum: trainer'i manuel kur, trainer.model'i pruned nn.Module yap.
+# DetectionTrainer.setup_model "isinstance(model, nn.Module) -> return" oldugu icin
+# yeniden kurmaz; pruned modeli egitir.
+print("=" * 60)
+print("5) FINE-TUNE (pruned modeli koruyarak)")
+print("=" * 60)
 
-#yolo.train(
-#    data=DATA_YAML,
-#    epochs=10,
-#    imgsz=IMG,
-#    lr0=0.001,
-#    device=DEVICE,
-#    project=str(OUT),
-#    name="finetune",
-#    exist_ok=True,
-#)
+from ultralytics.models.yolo.detect import DetectionTrainer
+
+# KRITIK: pruning scaffolding'i fine-tune'dan ONCE serbest birak.
+# pruner tum DependencyGraph + modeli pinler; importance ve trace artiklari
+# da VRAM tutar. Silmezsek bu bellek egitim boyunca geri verilmez ve egitimin
+# kendi train+EMA+val tahsisinin USTUNE biner -> VRAM tirmanir.
+for _v in ("pruner", "importance", "shape_before"):
+    if _v in globals():
+        del globals()[_v]
+gc.collect()
+if DEVICE == "cuda":
+    torch.cuda.empty_cache()
+
+trainer = DetectionTrainer(overrides=dict(
+    model=MODEL_PATH,        # sadece args/yaml icin; trainer.model'i altta eziyoruz
+    data=DATA_YAML,
+    epochs=10,
+    imgsz=IMG,
+    lr0=0.001,
+    device=DEVICE,
+    project=str(OUT),
+    name="finetune",
+    exist_ok=True,
+    batch=8,        # 16 -> 8
+    workers=4,      # 8 -> 4 (val worker'larıyla toplam RAM zirvesini düşürür)
+    cache=False,    # zaten kapalı, açık bırakma
+))
+trainer.model = yolo.model   # pruned nn.Module -> setup_model rebuild YAPMAZ
+trainer.train()
+
+# egitilen (pruned) modeli geri al; sonraki val/save/export bunu kullansin
+yolo.model = trainer.model
+yolo.model.to(DEVICE).eval()
 
 
 # ==========================================================
@@ -336,9 +378,34 @@ torch.onnx.export(
 # onnxsim ile slim
 try:
     import onnx
+    import onnxruntime as ort
     from onnxsim import simplify
-    m = onnx.load(str(onnx_yol))
-    m_simp, ok = simplify(m)
+
+    # onnxsim icindeki onnxruntime, intra_op_num_threads belirtilmediginde worker
+    # thread'leri sirali CPU indekslerine (0..N-1) pinlemeye calisir. Bu host'ta
+    # izinli cekirdekler non-contiguous ({4,6,21,...}) oldugundan
+    # "pthread_setaffinity_np failed ... error code: 22" hatasi basar.
+    # Cozum (ORT mesajinin kendi onerisi): thread sayisini ACIKCA ver -> ORT affinity
+    # pinlemeyi tamamen atlar. onnxsim kendi SessionOptions'ini (intra_op=0/auto)
+    # uretir; o yuzden InferenceSession'i kisa sureligine sarmalayip degeri set ediyoruz.
+    _n_threads = max(1, len(os.sched_getaffinity(0)))
+    _orig_session = ort.InferenceSession
+
+    def _session_with_threads(*args, **kwargs):
+        so = kwargs.get("sess_options")
+        if so is None and len(args) >= 2 and isinstance(args[1], ort.SessionOptions):
+            so = args[1]
+        if so is not None and so.intra_op_num_threads == 0:
+            so.intra_op_num_threads = _n_threads
+        return _orig_session(*args, **kwargs)
+
+    ort.InferenceSession = _session_with_threads
+    try:
+        m = onnx.load(str(onnx_yol))
+        m_simp, ok = simplify(m)
+    finally:
+        ort.InferenceSession = _orig_session  # patch'i geri al
+
     if ok:
         onnx.save(m_simp, str(onnx_yol))
         print("onnxsim: ok")

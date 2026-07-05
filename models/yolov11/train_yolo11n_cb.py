@@ -31,7 +31,7 @@ from ultralytics.utils import LOGGER
 
 from src.cb_loss import compute_cb_weights
 
-RUNS_DIR = PROJECT_ROOT / "runs"
+RUNS_DIR = PROJECT_ROOT / "runs_new"
 
 NANO_CFG = {
     "IMG_SIZE":       640,
@@ -63,7 +63,7 @@ NANO_CFG = {
     "ERASING":        0.0,
     "BETA":           0.99999999,
     "PROJECT":        str(RUNS_DIR),
-    "NAME":           "yolo11n_cb_beta_0.99999999_augmented",
+    "NAME":           "yolo11n_cb_beta_0.99999999_restratified_16.06.2026",
     "OUTPUT_XLSX":    "training_metrics.xlsx",
 }
 
@@ -250,7 +250,7 @@ class CBTrainingCallbacks:
 
         per_class = self._collect_per_class(trainer)
         row = [
-            epoch, round(lr_val, 8),
+            (epoch + 1), round(lr_val, 8),
             _fmt(box_t), _fmt(box_v),
             _fmt(cls_t), _fmt(cls_v),
             _fmt(dfl_t), _fmt(dfl_v),
@@ -293,7 +293,9 @@ class CBTrainingCallbacks:
                     res["map50_95"][cls_idx] = box.maps[cls_idx]
                 if box.p is not None and pos < len(box.p):
                     res["precision"][cls_idx] = box.p[pos]
-                r_arr = box.recall if box.recall is not None else box.r
+                r_arr = getattr(box, "r", None)
+                if r_arr is None: r_arr = getattr(box, "recall", None)
+                if r_arr is not None and not hasattr(r_arr, "__len__"): r_arr = None
                 if r_arr is not None and pos < len(r_arr):
                     res["recall"][cls_idx] = r_arr[pos]
         except Exception:
@@ -368,12 +370,12 @@ def train(
 
 
 if __name__ == "__main__":
-    DATA_YAML = "/home/atp-user-18/Desktop/uc_cihazlarda_terhmal_object_detection/dataset/2x_augmented_yolo_dataset/dataset_augmented_yolo/data.yaml"
+    DATA_YAML = "/home/atp-user-18/Desktop/uc_cihazlarda_terhmal_object_detection/dataset/restratified_yolo/data.yaml"
     # Class counts must match the order of `names` in data.yaml.
-    # Same values used by yolov8/yolo26 CB runs in this project.
-    # Sinif sayilari data.yaml'daki `names` sirasiyla. yolov8/yolo26 CB
-    # kosulariyla ayni degerler kullaniliyor.
-    CLASS_COUNTS = [335428, 577119, 36186]
+    # Recomputed from restratified_yolo/labels/train (person/car/other_vehicle).
+    # Sinif sayilari data.yaml'daki `names` sirasiyla. restratified_yolo train
+    # etiketlerinden yeniden hesaplandi (person/car/other_vehicle).
+    CLASS_COUNTS = [183383, 314714, 19278]
 
     # Set to a `last.pt` path to resume an interrupted run; leave None to start
     # fresh from yolo11n.pt.
@@ -392,7 +394,11 @@ if __name__ == "__main__":
     # (coco8.yaml, nc=80) ile fresh training'e duser ve CB callback'in nc=3
     # class_weights'i tensor mismatch verir. RESUME_FROM'u set etmeden once
     # kosunun gercekten yarida kaldigindan emin ol.
-    RESUME_FROM: Optional[str] = None
+    RESUME_FROM: Optional[str] = str(
+        PROJECT_ROOT / "runs_new"
+        / "yolo11n_cb_beta_0.99999999_restratified_16.06.2026"
+        / "weights" / "last.pt"
+    )
 
     train(
         data=DATA_YAML,

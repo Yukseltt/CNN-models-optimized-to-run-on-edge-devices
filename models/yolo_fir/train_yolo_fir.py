@@ -41,7 +41,7 @@ from ultralytics import YOLO
 from ultralytics.utils import LOGGER
 
 
-RUNS_DIR = PROJECT_ROOT / "runs"
+RUNS_DIR = PROJECT_ROOT / "runs_new"
 
 
 # Training configuration following FIR paper recommendations.
@@ -85,7 +85,7 @@ NANO_CFG = {
     "ERASING":        0.0,
 
     "PROJECT":        str(RUNS_DIR),
-    "NAME":           "yolo_fir_default",
+    "NAME":           "yolo_fir_16.06.2026",
     "OUTPUT_XLSX":    "training_metrics.xlsx",
 
     # Set to a `last.pt` path to resume an interrupted run.
@@ -350,5 +350,5 @@ def train(
 
 
 if __name__ == "__main__":
-    DATA_YAML = "/home/atp-user-18/Desktop/uc_cihazlarda_terhmal_object_detection/dataset/2x_augmented_yolo_dataset/dataset_augmented_yolo/data.yaml"
+    DATA_YAML = "/home/atp-user-18/Desktop/uc_cihazlarda_terhmal_object_detection/dataset/restratified_yolo/data.yaml"
     train(data=DATA_YAML)

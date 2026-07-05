@@ -33,7 +33,7 @@ from ultralytics.utils import LOGGER
 # Project root and runs directory.
 # Proje koku ve runs dizini.
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
-RUNS_DIR     = PROJECT_ROOT / "runs"
+RUNS_DIR     = PROJECT_ROOT / "runs_new"
 
 
 # Ultralytics default values explicitly written for reproducibility.
@@ -245,7 +245,7 @@ class DefaultTrainingCallbacks:
         per_class = self._collect_per_class(trainer)
 
         row = [
-            epoch, round(lr_val, 8),
+            (epoch + 1), round(lr_val, 8),
             _fmt(box_t), _fmt(box_v),
             _fmt(cls_t), _fmt(cls_v),
             _fmt(dfl_t), _fmt(dfl_v),
@@ -293,9 +293,9 @@ class DefaultTrainingCallbacks:
             return result
         maps     = getattr(box, "maps", None)
         p_arr    = getattr(box, "p", None)
-        r_arr    = getattr(box, "recall", None)
-        if r_arr is None:
-            r_arr = getattr(box, "r", None)
+        r_arr    = getattr(box, "r", None)
+        if r_arr is None: r_arr = getattr(box, "recall", None)
+        if r_arr is not None and not hasattr(r_arr, "__len__"): r_arr = None
         ap50_arr = getattr(box, "ap50", None)
         for pos, cls_idx in enumerate(ap_class_index):
             cls_idx = int(cls_idx)

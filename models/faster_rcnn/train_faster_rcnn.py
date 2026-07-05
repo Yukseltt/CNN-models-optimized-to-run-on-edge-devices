@@ -33,8 +33,16 @@ from typing import Optional
 import numpy as np
 import torch
 import torch.nn as nn
+import torch.multiprocessing as mp
 from torch.utils.data import DataLoader
 from torch.optim import SGD
+
+# Bu host'ta DataLoader worker'lari varsayilan "file_descriptor" paylasimi ile
+# EMFILE (too many open files) veriyor. "file_system" stratejisi sart.
+try:
+    mp.set_sharing_strategy("file_system")
+except RuntimeError:
+    pass
 
 from pycocotools.coco import COCO
 from pycocotools.cocoeval import COCOeval

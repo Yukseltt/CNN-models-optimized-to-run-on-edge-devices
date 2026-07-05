@@ -22,7 +22,7 @@ RUNS_DIR = PROJECT_ROOT / "runs"
 NANO_CFG = {
     "IMG_SIZE":       640,
     "DEVICE":         0,
-    "EPOCHS":         100, 
+    "EPOCHS":         200, 
     "BATCH_SIZE":     64,
     "PATIENCE":       30,
     "WORKERS":        8,
@@ -216,8 +216,9 @@ class DefaultTrainingCallbacks:
         if ap_class_index is None or len(ap_class_index) == 0: return result
         maps     = getattr(box, "maps", None)
         p_arr    = getattr(box, "p", None)
-        r_arr    = getattr(box, "recall", None)
-        if r_arr is None: r_arr = getattr(box, "r", None)
+        r_arr    = getattr(box, "r", None)
+        if r_arr is None: r_arr = getattr(box, "recall", None)
+        if r_arr is not None and not hasattr(r_arr, "__len__"): r_arr = None
         ap50_arr = getattr(box, "ap50", None)
         for pos, cls_idx in enumerate(ap_class_index):
             cls_idx = int(cls_idx)

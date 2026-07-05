@@ -22,13 +22,21 @@ from train_rtdetr import train
 #   "from_scratch" - HF Hub'tan SADECE config; agirliklar RANDOM init.
 #                    Hicbir pretrain yok, epoch 1'den kendi verinle baslar.
 #   "finetune"     - HF Hub'tan pretrained agirliklarla baslar (transfer learning).
-#   "resume"       - Mevcut checkpoint-394400'den devam eder.
-RUN_TYPE = "resume"
+#   "resume"       - Mevcut checkpoint'ten devam eder (LEGACY, eski dataset).
+# Komut satirindan secilebilir: python run_training.py from_scratch
+RUN_TYPE = sys.argv[1] if len(sys.argv) > 1 else "finetune"
 
 
+# restratified_coco: yeniden stratifiye edilmis dataset (train 35190 / val 4470 / test 4480).
+# Eski dataset: dataset/2x_augmented_coco_dataset/dataset_augmented
 DATA_DIR = (
     "/home/atp-user-18/Desktop/uc_cihazlarda_terhmal_object_detection/"
-    "dataset/2x_augmented_coco_dataset/dataset_augmented"
+    "dataset/restratified_coco"
+)
+
+# Tum yeni egitimler runs_new/ altina kaydedilir.
+RUNS_NEW = (
+    "/home/atp-user-18/Desktop/uc_cihazlarda_terhmal_object_detection/runs_new"
 )
 
 # Yarim kalan run; Excel son satiri epoch 36.81 step 98000, best 0.5375 @ epoch 27 step 72000.
@@ -76,9 +84,11 @@ FROM_SCRATCH_CFG = {
     "EVAL_ACCUM_STEPS":    4,
     "EVAL_STEPS":          2000,
     "COMPILE":             False,    # RT-DETR v2 encoder ile uyumsuz; deneme icin True yap
-    "NAME":                "rtdetr_v2_r18vd_from_scratch_26.05.2026",
+    "PROJECT":             RUNS_NEW,
+    "NAME":                "rtdetr_v2_r18vd_from_scratch_restratified_17.06.2026",
     "RESUME_FROM":         None,
     "FROM_SCRATCH":        True,
+    "SKIP_CONFIRM":        True,    # 1/0 sormadan cfg'deki FROM_SCRATCH'i kullan
 }
 
 
@@ -86,26 +96,30 @@ FROM_SCRATCH_CFG = {
 FINETUNE_CFG = {
     "EPOCHS":              150,
     "IMAGE_SIZE":          480,
-    "PER_DEVICE_TRAIN_BS": 16,
-    "PER_DEVICE_EVAL_BS":  32,
+    "PER_DEVICE_TRAIN_BS": 64,
+    "PER_DEVICE_EVAL_BS":  16,    # 32 OOM'd during first eval (Hungarian matcher VRAM spike)
     "GRAD_ACCUM":          1,
-    "LR":                  1e-4,
+    "LR":                  2e-4,    # linear scale: batch 32->64 (x2) -> LR x2
     "WARMUP_STEPS":        500,
     "PATIENCE":            20,
     "WORKERS":             6,
     "PREFETCH_FACTOR":     2,
     "EVAL_ACCUM_STEPS":    4,
     "EVAL_STEPS":          2000,
-    "COMPILE":             False,    # RT-DETR v2 encoder ile uyumsuz; deneme icin True yap
-    "NAME":                "rtdetr_v2_r18vd_finetune_26.05.2026",
+    "COMPILE":             False,
+    "PROJECT":             RUNS_NEW,
+    "NAME":                "rtdetr_v2_r18vd_finetune_restratified_01.07.2026",
     "RESUME_FROM":         None,
     "FROM_SCRATCH":        False,
+    "SKIP_CONFIRM":        True,
 }
 
 
-# Yarim kalan run'dan (checkpoint-98000) devam.
+# LEGACY: yarim kalan ESKI run'dan (checkpoint-98000) devam.
+# DIKKAT: bu config ESKI dataset (2x_augmented) icin; yukaridaki DATA_DIR artik
+# restratified_coco'ya isaret ediyor. Resume kullanacaksan DATA_DIR'i eski
+# dataset'e geri al, aksi halde farkli veriyle devam etmis olursun.
 # Excel son satiri: epoch 36.81 / step 98000. Best: 0.5375 @ epoch 27 / step 72000.
-# Excel/best/last ayni run dizinine append edilir.
 RESUME_CFG = {
     "EPOCHS":              300,         # ilk run'in epoch budget'i ile ayni
     "IMAGE_SIZE":          480,         # ilk run 480px ile egitilmis

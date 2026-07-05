@@ -1,0 +1,104 @@
+/home/atp-user-18/Desktop/uc_cihazlarda_terhmal_object_detection/venv/lib/python3.12/site-packages/torch/cuda/__init__.py:716: UserWarning: Can't initialize NVML
+  warnings.warn("Can't initialize NVML")
+/home/atp-user-18/Desktop/uc_cihazlarda_terhmal_object_detection/venv/lib/python3.12/site-packages/albumentations/core/composition.py:331: UserWarning: Got processor for bboxes, but no transform to process it.
+  self._set_keys()
+============================================================
+1) BASELINE
+============================================================
+[FRCNN] backbone=mobilenet, classes=['Person', 'Car', 'OtherVehicle']
+params (real) = 18.940479 M
+loading annotations into memory...
+Done (t=0.02s)
+creating index...
+index created!
+Loading and preparing results...
+DONE (t=0.02s)
+creating index...
+index created!
+Running per image evaluation...
+Evaluate annotation type *bbox*
+DONE (t=1.16s).
+Accumulating evaluation results...
+DONE (t=0.11s).
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.425
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.725
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.429
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.333
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.478
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.379
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.203
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.511
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.548
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.425
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.590
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.409
+  Validation done in 31.2s
+baseline mAP@0.5=0.7254  mAP@0.5:0.95=0.4252
+============================================================
+2) PRUNE (backbone-only, DepGraph)
+============================================================
+[FRCNN] prunable backbone conv: 1 katman
+[sweep] val subset = ilk 200 goruntu
+Loading and preparing results...
+DONE (t=0.00s)
+creating index...
+index created!
+[sweep] subset baseline mAP@0.5=0.8096  (1 katman)
+Loading and preparing results...
+DONE (t=0.01s)
+creating index...
+index created!
+[sweep 1/1] body.0.0 oran=0.1 mAP=0.7952 dusus=0.0144
+Loading and preparing results...
+DONE (t=0.01s)
+creating index...
+index created!
+[sweep 1/1] body.0.0 oran=0.2 mAP=0.8027 dusus=0.0069
+Loading and preparing results...
+DONE (t=0.01s)
+creating index...
+index created!
+[sweep 1/1] body.0.0 oran=0.3 mAP=0.7548 dusus=0.0548
+Loading and preparing results...
+DONE (t=0.00s)
+creating index...
+index created!
+[sweep 1/1] body.0.0 oran=0.5 mAP=0.6924 dusus=0.1172
+[FRCNN] per-layer butce: {'body.0.0': 0.1} ...
+backbone shape degisen conv sayisi: 4
+KESIM SONRASI params (real) = 18.940219 M  azalma= 0.0 %
+============================================================
+3) VERIFY tam model forward
+============================================================
+forward OK, ornek cikti anahtarlari: ['boxes', 'labels', 'scores']
+[FRCNN] fine-tune atlandi (DO_FINETUNE=False).
+Kesim sonrasi eval (fine-tune YOK)...
+Loading and preparing results...
+DONE (t=0.03s)
+creating index...
+index created!
+Running per image evaluation...
+Evaluate annotation type *bbox*
+DONE (t=2.22s).
+Accumulating evaluation results...
+DONE (t=0.19s).
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.400
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.694
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.396
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.322
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.441
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.372
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.179
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.485
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.522
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.417
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.551
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.403
+  Validation done in 34.2s
+  kesim sonrasi mAP@0.5=0.6941  mAP@0.5:0.95=0.4001
+============================================================
+5) FINAL
+============================================================
+mAP@0.5: 0.7253598801213316 -> 0.6940935629002773
+params (real): 18.940479 M -> 18.940219 M  azalma= 0.0 %
+{'baseline_map': 0.7253598801213316, 'final_map': 0.6940935629002773, 'params_before_M': 18.940479, 'params_after_M': 18.940219, 'reduction_pct': 0.0, 'out': '/home/atp-user-18/Desktop/uc_cihazlarda_terhmal_object_detection/runs_pruing/faster_rcnn_mobilenet'}

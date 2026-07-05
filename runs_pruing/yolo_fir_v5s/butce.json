@@ -1,0 +1,19 @@
+{
+  "model.1.conv": 0.1,
+  "model.2.m.0.cv2.conv": 0.1,
+  "model.3.conv": 0.1,
+  "model.4.m.0.cv2.conv": 0.1,
+  "model.4.m.1.cv2.conv": 0.1,
+  "model.5.conv": 0.1,
+  "model.6.m.0.cv2.conv": 0.1,
+  "model.6.m.1.cv2.conv": 0.1,
+  "model.6.m.2.cv2.conv": 0.1,
+  "model.7.conv": 0.1,
+  "model.8.m.0.cv2.conv": 0.1,
+  "model.13.m.0.cv2.conv": 0.1,
+  "model.17.m.0.cv2.conv": 0.1,
+  "model.18.conv": 0.1,
+  "model.20.m.0.cv2.conv": 0.1,
+  "model.21.conv": 0.1,
+  "model.23.m.0.cv2.conv": 0.1
+}

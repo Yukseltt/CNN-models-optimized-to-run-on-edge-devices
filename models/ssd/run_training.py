@@ -24,12 +24,19 @@ from train_ssd import train
 #   "mobilenet_coco"     - SSDLite + MobileNetV3 COCO pretrained (transfer learning)
 #   "mobilenet_scratch"  - SSDLite + MobileNetV3 backbone-only ImageNet, head from scratch
 
-RUN_TYPE = "mobilenet_coco"
+# Komut satirindan secilebilir: `python run_training.py mobilenet_coco`
+# Arguman verilmezse asagidaki varsayilan kullanilir.
+RUN_TYPE = sys.argv[1] if len(sys.argv) > 1 else "mobilenet_coco"
 
 
 # Shared / Ortak
 
-DATA_DIR = "/home/atp-user-18/Desktop/uc_cihazlarda_terhmal_object_detection/dataset/2x_augmented_coco_dataset/dataset_augmented"
+# restratified_coco: yeniden stratifiye edilmis dataset (train 35190 / val 4470 / test 4480).
+# Eski dataset: dataset/2x_augmented_coco_dataset/dataset_augmented
+DATA_DIR = "/home/atp-user-18/Desktop/uc_cihazlarda_terhmal_object_detection/dataset/restratified_coco"
+
+# Tum yeni egitimler runs_new/ altina kaydedilir.
+RUNS_NEW = "/home/atp-user-18/Desktop/uc_cihazlarda_terhmal_object_detection/runs_new"
 
 
 # Transfer learning configuration / Transfer learning konfigurasyonu.
@@ -57,7 +64,8 @@ MOBILENET_COCO_CFG = {
     "WEIGHT_DECAY": 0.00004,
     "EPOCHS":       300,
     "PATIENCE":     20,
-    "NAME":         "ssdlite_mobilenet_27.05.2026",
+    "PROJECT":      RUNS_NEW,
+    "NAME":         "ssdlite_mobilenet_restratified_20.06.2026",
     "OUTPUT_XLSX":  "training_metrics.xlsx",
 }
 
@@ -82,7 +90,8 @@ MOBILENET_SCRATCH_CFG = {
     "WEIGHT_DECAY": 0.00004,
     "EPOCHS":       100,
     "PATIENCE":     20,
-    "NAME":         "ssdlite_mobilenet_scratch_27.05.2026",
+    "PROJECT":      RUNS_NEW,
+    "NAME":         "ssdlite_mobilenet_scratch_restratified_20.06.2026",
     "OUTPUT_XLSX":  "training_metrics.xlsx",
 }
 
@@ -100,4 +109,9 @@ if __name__ == "__main__":
         raise ValueError(
             f"RUN_TYPE must be one of {list(CONFIGS.keys())}, got: {RUN_TYPE!r}"
         )
-    train(data_dir=DATA_DIR, cfg=CONFIGS[RUN_TYPE])
+    cfg = dict(CONFIGS[RUN_TYPE])
+    # Opsiyonel resume: `python run_training.py mobilenet_coco /yol/last.pt`
+    # 2. arguman verilirse o checkpoint'ten devam eder; cikti o dizine yazilir.
+    if len(sys.argv) > 2:
+        cfg["RESUME_FROM"] = sys.argv[2]
+    train(data_dir=DATA_DIR, cfg=cfg)

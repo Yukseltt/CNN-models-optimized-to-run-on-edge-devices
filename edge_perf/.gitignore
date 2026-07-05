@@ -1,0 +1,13 @@
+# Agirliklar ve derlenmis artifact'lar repoya girmesin (yuzlerce MB).
+# models/<key>/ icindeki .pt/.onnx/.hef/.engine bundle'lari git'e GIRMEZ;
+# kodu paylasirsin, agirliklari prepare_models.py + convert/ ile uretirsin.
+models/*/*.pt
+models/*/*.onnx
+models/*/*.hef
+models/*/*.engine
+models/*/*.har
+models/*/calib_imgs/
+models/*/trt_cache*/
+results/
+__pycache__/
+*.pyc

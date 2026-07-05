@@ -1,6 +1,6 @@
 task: detect
 mode: train
-model: yolov8n.pt
+model: /home/atp-user-18/Desktop/uc_cihazlarda_terhmal_object_detection/runs_new/yolov8n_default_restratified_14.06.2026/weights/last.pt
 data: /home/atp-user-18/Desktop/uc_cihazlarda_terhmal_object_detection/dataset/restratified_yolo/data.yaml
 epochs: 300
 time: null
@@ -24,7 +24,7 @@ single_cls: false
 rect: false
 cos_lr: false
 close_mosaic: 10
-resume: false
+resume: /home/atp-user-18/Desktop/uc_cihazlarda_terhmal_object_detection/runs_new/yolov8n_default_restratified_14.06.2026/weights/last.pt
 amp: true
 fraction: 1.0
 profile: false
@@ -77,7 +77,7 @@ momentum: 0.937
 weight_decay: 0.0005
 warmup_epochs: 3
 warmup_momentum: 0.8
-warmup_bias_lr: 0.1
+warmup_bias_lr: 0.0
 box: 7.5
 cls: 0.5
 cls_pw: 0.0

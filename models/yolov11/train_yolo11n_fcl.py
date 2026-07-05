@@ -48,7 +48,8 @@ from src.focal_loss_func import binary_focal_loss_with_logits
 
 # Default output directory for training artifacts and Excel logs.
 # Egitim ciktilari ve Excel kayitlari icin varsayilan cikti dizini.
-RUNS_DIR = PROJECT_ROOT / "runs"
+# Yeni egitimler runs_new/ altina (restratified pipeline).
+RUNS_DIR = PROJECT_ROOT / "runs_new"
 
 
 # Training configuration with YOLOv8-nano defaults.
@@ -91,7 +92,7 @@ NANO_CFG = {
     "FCL_GAMMA":      2.0,
 
     "PROJECT":        str(RUNS_DIR),
-    "NAME":           "yolo11n_fcl26.04.2026",
+    "NAME":           "yolo11n_fcl_alpha_0.25_gamma_2.0_restratified_17.06.2026",
     "OUTPUT_XLSX":    "training_metrics.xlsx",
 }
 
@@ -361,7 +362,7 @@ class FCLTrainingCallbacks:
         per_class = self._collect_per_class(trainer)
 
         row = [
-            epoch, round(lr_val, 8),
+            (epoch + 1), round(lr_val, 8),
             _fmt(box_t), _fmt(box_v),
             _fmt(cls_t), _fmt(cls_v),
             _fmt(dfl_t), _fmt(dfl_v),
@@ -411,9 +412,9 @@ class FCLTrainingCallbacks:
             return result
         maps     = getattr(box, "maps", None)
         p_arr    = getattr(box, "p", None)
-        r_arr    = getattr(box, "recall", None)
-        if r_arr is None:
-            r_arr = getattr(box, "r", None)
+        r_arr    = getattr(box, "r", None)
+        if r_arr is None: r_arr = getattr(box, "recall", None)
+        if r_arr is not None and not hasattr(r_arr, "__len__"): r_arr = None
         ap50_arr = getattr(box, "ap50", None)
         for pos, cls_idx in enumerate(ap_class_index):
             cls_idx = int(cls_idx)
@@ -508,5 +509,8 @@ def train(
 
 
 if __name__ == "__main__":
-    DATA_YAML = "/home/atp-user-18/Desktop/uc_cihazlarda_terhmal_object_detection/dataset/2x_augmented_yolo_dataset/dataset_augmented_yolo/data.yaml"
+    # restratified_yolo: yeniden stratifiye edilmis YOLO dataseti
+    # (train 35190 / val 4470 / test 4480; names: person/car/other_vehicle).
+    # Eski dataset: dataset/2x_augmented_yolo_dataset/dataset_augmented_yolo/data.yaml
+    DATA_YAML = "/home/atp-user-18/Desktop/uc_cihazlarda_terhmal_object_detection/dataset/restratified_yolo/data.yaml"
     train(data=DATA_YAML)

@@ -26,6 +26,16 @@ import json
 
 import openpyxl
 import torch
+import torch.multiprocessing as mp
+
+# Bu host'ta DataLoader worker'lari (persistent + prefetch) varsayilan
+# "file_descriptor" paylasimi ile EMFILE (too many open files) veriyor.
+# "file_system" stratejisi sart.
+try:
+    mp.set_sharing_strategy("file_system")
+except RuntimeError:
+    pass
+
 from transformers import (
     AutoConfig,
     AutoImageProcessor,

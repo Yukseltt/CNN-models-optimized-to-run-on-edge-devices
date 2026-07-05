@@ -26,12 +26,19 @@ from train_faster_rcnn import train
 #   "resnet50_scratch"       - ResNet50 backbone-only ImageNet, head from scratch
 #   "mobilenet_scratch"      - MobileNet backbone-only ImageNet, head from scratch
 
-RUN_TYPE = "mobilenet_scratch"
+# Komut satirindan secilebilir: `python run_training.py mobilenet_coco`
+# Arguman verilmezse asagidaki varsayilan kullanilir.
+RUN_TYPE = sys.argv[1] if len(sys.argv) > 1 else "resnet50_coco"
 
 
 # Shared / Ortak
 
-DATA_DIR = "/home/atp-user-18/Desktop/uc_cihazlarda_terhmal_object_detection/dataset/2x_augmented_coco_dataset/dataset_augmented"
+# restratified_coco: yeniden stratifiye edilmis dataset (train 35190 / val 4470 / test 4480).
+# Eski dataset: dataset/2x_augmented_coco_dataset/dataset_augmented
+DATA_DIR = "/home/atp-user-18/Desktop/uc_cihazlarda_terhmal_object_detection/dataset/restratified_coco"
+
+# Tum yeni egitimler runs_new/ altina kaydedilir.
+RUNS_NEW = "/home/atp-user-18/Desktop/uc_cihazlarda_terhmal_object_detection/runs_new"
 
 
 # Transfer learning configurations / Transfer learning konfigurasyonlari.
@@ -41,9 +48,10 @@ RESNET50_COCO_CFG = {
     "PRETRAINED":  "coco",
     "BATCH_SIZE":  8,
     "LR0":         0.005,
-    "EPOCHS":      50,
-    "PATIENCE":    10,
-    "NAME":        "faster_rcnn_resnet50_28.04.2026",
+    "EPOCHS":      150,
+    "PATIENCE":    15,
+    "PROJECT":     RUNS_NEW,
+    "NAME":        "faster_rcnn_resnet50_restratified_17.06.2026",
     "OUTPUT_XLSX": "training_metrics.xlsx",
 }
 
@@ -52,9 +60,10 @@ MOBILENET_COCO_CFG = {
     "PRETRAINED":  "coco",
     "BATCH_SIZE":  16,
     "LR0":         0.01,
-    "EPOCHS":      50,
-    "PATIENCE":    10,
-    "NAME":        "faster_rcnn_mobilenet_29.04.2026",
+    "EPOCHS":      150,
+    "PATIENCE":    15,
+    "PROJECT":     RUNS_NEW,
+    "NAME":        "faster_rcnn_mobilenet_restratified_17.06.2026",
     "OUTPUT_XLSX": "training_metrics.xlsx",
 }
 
@@ -74,9 +83,9 @@ RESNET50_SCRATCH_CFG = {
     "LR0":         0.005,
     "EPOCHS":      100,
     "PATIENCE":    20,
-    "NAME":        "faster_rcnn_resnet50_scratch_29.04.2026",
+    "PROJECT":     RUNS_NEW,
+    "NAME":        "faster_rcnn_resnet50_scratch_restratified_17.06.2026",
     "OUTPUT_XLSX": "training_metrics.xlsx",
-    "RESUME_FROM": "/home/atp-user-18/Desktop/uc_cihazlarda_terhmal_object_detection/runs/faster_rcnn_resnet50_scratch_29.04.2026/last.pt",
 }
 
 MOBILENET_SCRATCH_CFG = {
@@ -84,9 +93,10 @@ MOBILENET_SCRATCH_CFG = {
     "PRETRAINED":  "backbone_only",
     "BATCH_SIZE":  16,
     "LR0":         0.01,
-    "EPOCHS":      100,
-    "PATIENCE":    20,
-    "NAME":        "faster_rcnn_mobilenet_scratch_12.05.2026",
+    "EPOCHS":      150,
+    "PATIENCE":    15,
+    "PROJECT":     RUNS_NEW,
+    "NAME":        "faster_rcnn_mobilenet_scratch_restratified_17.06.2026",
     "OUTPUT_XLSX": "training_metrics.xlsx",
 }
 
@@ -106,4 +116,9 @@ if __name__ == "__main__":
         raise ValueError(
             f"RUN_TYPE must be one of {list(CONFIGS.keys())}, got: {RUN_TYPE!r}"
         )
-    train(data_dir=DATA_DIR, cfg=CONFIGS[RUN_TYPE])
+    cfg = dict(CONFIGS[RUN_TYPE])
+    # Opsiyonel resume: `python run_training.py mobilenet_coco /yol/last.pt`
+    # 2. arguman verilirse o checkpoint'ten devam eder; cikti o dizine yazilir.
+    if len(sys.argv) > 2:
+        cfg["RESUME_FROM"] = sys.argv[2]
+    train(data_dir=DATA_DIR, cfg=cfg)

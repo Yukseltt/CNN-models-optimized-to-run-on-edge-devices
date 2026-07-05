@@ -1,0 +1,24 @@
+# RPi5 (ARM64) icin edge_perf bagimliliklari.
+# Kur:  python3 -m venv venv && source venv/bin/activate && pip install -r requirements_rpi5.txt
+#
+# --- her durumda gerekli ---
+numpy
+opencv-python-headless
+pycocotools
+psutil
+
+# --- YOLO (base/pruned, onnx-CPU veya .pt) ---
+ultralytics            # torch CPU'yu da ceker; YOLO .onnx/.pt'yi onnxruntime/CPU ile kosar
+
+# --- onnxruntime-CPU (rtdetr/frcnn .onnx + YOLO .onnx; int8/fp16 dahil) ---
+onnxruntime            # DIKKAT: ARM CPU wheel. 'onnxruntime-gpu' KURMA (Pi'de CUDA yok).
+
+# --- frcnn/rtdetr torch-CPU yedegi (.onnx yoksa .pt'den; agir, opsiyonel) ---
+# torch                # frcnn icin (onnx export'u kirilgan -> torch-CPU yedek)
+# torchvision          # frcnn mimarisi
+# transformers         # rtdetr (.pt yolu kullanilacaksa)
+
+# --- Hailo-8L NPU (.hef int8) — pip ILE DEGIL ---
+# hailort + hailo_platform: Raspberry Pi AI Kit / Hailo kurulum paketinden gelir
+# (sudo apt install hailo-all  veya Hailo'nun .deb'leri). Kurulunca main.py .hef'i
+# otomatik kullanir; yoksa onnxruntime-CPU'ya duser.
