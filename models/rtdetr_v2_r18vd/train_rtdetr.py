@@ -19,6 +19,7 @@ checkpoint'ler runs/<NAME>/checkpoints/ altina yazilir.
 """
 
 import sys
+import time
 from pathlib import Path
 from typing import Optional
 
@@ -182,7 +183,14 @@ class _ExcelLogCallback(TrainerCallback):
             eval_metrics=metrics,
             class_names=self.class_names,
         )
-        append_row(self.xlsx_path, row)
+        # Excel yazimi HICBIR kosulda egitimi olduremez: Drive FUSE mount
+        # gecici olarak dosyayi kaybedebilir (30 saatlik run'i 1 satir log
+        # icin cokertmek kabul edilemez). append_row zaten retry + yeniden
+        # kurma yapiyor; o da yetmezse satiri atla, egitime devam.
+        try:
+            append_row(self.xlsx_path, row, class_names=self.class_names)
+        except Exception as e:
+            print(f"[ExcelLog] UYARI: satir yazilamadi ({type(e).__name__}: {e}); atlandi.")
         print(
             f"[ExcelLog] epoch={row[0]} step={row[1]} "
             f"train_loss={row[3]} val_loss={row[4]} "
@@ -251,6 +259,24 @@ class _BestLastPtCallback(TrainerCallback):
             "metric":      float(metric) if metric is not None else None,
         }
 
+    @staticmethod
+    def _safe_save(obj, path: Path) -> bool:
+        """torch.save — Drive FUSE gecici hatalarina karsi 3 deneme.
+        Basarisizsa False doner; egitim devam eder (snapshot bir sonraki
+        eval'de zaten yeniden yazilir)."""
+        last_err = None
+        for delay in (0, 5, 15):
+            if delay:
+                time.sleep(delay)
+            try:
+                torch.save(obj, path)
+                return True
+            except Exception as e:
+                last_err = e
+        print(f"[BestLast] UYARI: {path.name} yazilamadi "
+              f"({type(last_err).__name__}: {last_err}); atlandi.")
+        return False
+
     def on_evaluate(self, args, state, control, metrics=None, model=None, **kwargs):
         if model is None or metrics is None:
             return
@@ -258,13 +284,15 @@ class _BestLastPtCallback(TrainerCallback):
         epoch  = (state.epoch or 0.0) + self.epoch_offset
 
         last_path = self.run_dir / "last.pt"
-        torch.save(self._snapshot(model, epoch, metric), last_path)
+        self._safe_save(self._snapshot(model, epoch, metric), last_path)
 
         if metric is not None and metric > self._best_metric:
-            self._best_metric = float(metric)
             best_path = self.run_dir / "best.pt"
-            torch.save(self._snapshot(model, epoch, metric), best_path)
-            print(f"[BestLast] NEW BEST {self.metric_key}={metric:.4f} -> {best_path.name}")
+            # _best_metric sadece yazim BASARILIYSA guncellenir; yoksa diskteki
+            # best.pt eski kalir ve bir sonraki iyilesmede tekrar denenir.
+            if self._safe_save(self._snapshot(model, epoch, metric), best_path):
+                self._best_metric = float(metric)
+                print(f"[BestLast] NEW BEST {self.metric_key}={metric:.4f} -> {best_path.name}")
 
 
 class _ResumeStateTrainer(Trainer):
@@ -450,6 +478,8 @@ def train(data_dir: str, cfg: Optional[dict] = None) -> None:
 
     use_bf16 = torch.cuda.is_available() and torch.cuda.is_bf16_supported()
     use_fp16 = torch.cuda.is_available() and not use_bf16
+    # TF32 sadece Ampere+ (compute capability >= 8.0) GPU'larda mevcut (T4 = 7.5).
+    use_tf32 = torch.cuda.is_available() and torch.cuda.get_device_capability()[0] >= 8
 
     # TF32 fp32 matmul'lerini hizlandirir (H200 / Ampere+). bf16 patikalarini
     # etkilemez ama optimizer / norm gibi fp32 kalan kisimlarda kazanc saglar.
@@ -478,7 +508,7 @@ def train(data_dir: str, cfg: Optional[dict] = None) -> None:
         bf16                        = use_bf16,
         fp16                        = use_fp16,
         bf16_full_eval              = use_bf16,
-        tf32                        = torch.cuda.is_available(),
+        tf32                        = use_tf32,
 
         # Fused AdamW: tek CUDA kernel, ~5-10% adim hizlandirma.
         optim                       = "adamw_torch_fused",

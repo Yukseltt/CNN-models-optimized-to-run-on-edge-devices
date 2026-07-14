@@ -501,6 +501,8 @@ def train(data_dir: str, cfg: Optional[dict] = None) -> None:
         precision = "fp32"
     use_bf16 = precision == "bf16"
     use_fp16 = precision == "fp16"
+    # TF32 sadece Ampere+ (compute capability >= 8.0) GPU'larda mevcut (T4 = 7.5).
+    use_tf32 = torch.cuda.is_available() and torch.cuda.get_device_capability()[0] >= 8
 
     # TF32 fp32 matmul'lerini hizlandirir (H200 / Ampere+). bf16 patikalarini
     # etkilemez ama optimizer / norm gibi fp32 kalan kisimlarda kazanc saglar.
@@ -529,7 +531,7 @@ def train(data_dir: str, cfg: Optional[dict] = None) -> None:
         bf16                        = use_bf16,
         fp16                        = use_fp16,
         bf16_full_eval              = use_bf16,
-        tf32                        = torch.cuda.is_available(),
+        tf32                        = use_tf32,
 
         # Fused AdamW: tek CUDA kernel, ~5-10% adim hizlandirma.
         optim                       = "adamw_torch_fused",

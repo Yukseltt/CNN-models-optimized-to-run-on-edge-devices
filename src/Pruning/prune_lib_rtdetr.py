@@ -287,6 +287,8 @@ def prune_rtdetr(cfg: dict) -> dict:
 
     use_bf16 = torch.cuda.is_available() and torch.cuda.is_bf16_supported()
     use_fp16 = torch.cuda.is_available() and not use_bf16
+    # TF32 sadece Ampere+ (compute capability >= 8.0) GPU'larda mevcut (T4 = 7.5).
+    use_tf32 = torch.cuda.is_available() and torch.cuda.get_device_capability()[0] >= 8
 
     args = TrainingArguments(
         output_dir                  = str(OUT / "hf_checkpoints"),
@@ -309,7 +311,7 @@ def prune_rtdetr(cfg: dict) -> dict:
         # ("Input FloatTensor vs weight BFloat16"). False -> eval autocast ile
         # bf16 hesaplar ama paramlar fp32 kalir; pruning/verify tutarli.
         bf16_full_eval              = False,
-        tf32                        = torch.cuda.is_available(),
+        tf32                        = use_tf32,
         optim                       = "adamw_torch_fused",
         eval_accumulation_steps     = 4,
         eval_strategy               = c.get("EVAL_STRATEGY", "no"),  # "epoch" -> her epoch eval (ilerleme gormek icin)
