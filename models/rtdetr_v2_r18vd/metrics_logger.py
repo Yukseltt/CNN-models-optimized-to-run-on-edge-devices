@@ -5,6 +5,7 @@ Bir epoch icin tek satir yazar; Faster R-CNN run klasoru ile ayni stiilde
 sutunlar farklidir (torchmetrics MeanAveragePrecision ciktilari).
 """
 
+import time
 from pathlib import Path
 from typing import Optional
 
@@ -63,19 +64,42 @@ def _fmt(v) -> Optional[float]:
     return None if v is None else round(float(v), 6)
 
 
-def append_row(path: Path, row: list) -> None:
-    wb = openpyxl.load_workbook(path)
-    ws = wb["Training Metrics"]
-    r = ws.max_row + 1
-    alt = ALT_FILL if r % 2 == 0 else None
-    for ci, val in enumerate(row, 1):
-        c = ws.cell(row=r, column=ci, value=val)
-        c.font = DATA_FONT
-        c.alignment = Alignment(horizontal="center")
-        c.border = BORDER
-        if alt:
-            c.fill = alt
-    wb.save(path)
+def append_row(path: Path, row: list, class_names: Optional[list[str]] = None) -> None:
+    """Satir ekle — Drive/FUSE gecici hatalarina dayanikli.
+
+    Colab'da xlsx dogrudan Drive'a yazildiginda FUSE mount ara sira dosyayi
+    "kaybeder" (FileNotFoundError) veya IO hatasi verir; bu 30 saatlik bir
+    egitimi olduremez. 4 deneme (0/2/5/10 sn bekleme); dosya hala yoksa ve
+    class_names verildiyse workbook headerlarla yeniden kurulur (onceki
+    satirlar kaybolur ama checkpoint'lerdeki trainer_state.json'dan geri
+    cikarilabilir). Tum denemeler biterse son hata raise edilir — cagiran
+    taraf yakalayip egitime devam etmeli.
+    """
+    path = Path(path)
+    last_err: Optional[Exception] = None
+    for delay in (0, 2, 5, 10):
+        if delay:
+            time.sleep(delay)
+        try:
+            if not path.exists() and class_names is not None:
+                print(f"[ExcelLog] {path.name} kayip (Drive mount?) — yeniden kuruluyor.")
+                build_excel(path, class_names)
+            wb = openpyxl.load_workbook(path)
+            ws = wb["Training Metrics"]
+            r = ws.max_row + 1
+            alt = ALT_FILL if r % 2 == 0 else None
+            for ci, val in enumerate(row, 1):
+                c = ws.cell(row=r, column=ci, value=val)
+                c.font = DATA_FONT
+                c.alignment = Alignment(horizontal="center")
+                c.border = BORDER
+                if alt:
+                    c.fill = alt
+            wb.save(path)
+            return
+        except Exception as e:
+            last_err = e
+    raise last_err
 
 
 def build_row(
