@@ -96,6 +96,7 @@ Gerçek katkı dağılımı:
   script'leri, YOLO-FIR / termal model eğitimleri, uç cihaz ölçümlerinin yürütülmesi
 - **Erhan Yüksel Turgut** — DETR ve Faster R-CNN eğitim hatları, Focal Loss ve Class-Balanced
   Loss uygulamaları ve sweep'leri, ONNX dönüşüm ve TensorRT motor üretim hattı
+- **Hakan Enes Demir** — model ablasyon denemeleri ve eğitim koşularının karşılaştırılması
 
 ## Kaynaklar
 
