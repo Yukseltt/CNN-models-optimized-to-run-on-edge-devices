@@ -95,7 +95,8 @@ Gerçek katkı dağılımı:
 - **Uğurhan Daşdemir** — benchmark altyapısı, model karşılaştırma ve ölçüm hattı, budama
   script'leri, YOLO-FIR / termal model eğitimleri, uç cihaz ölçümlerinin yürütülmesi
 - **Erhan Yüksel Turgut** — DETR ve Faster R-CNN eğitim hatları, Focal Loss ve Class-Balanced
-  Loss uygulamaları ve sweep'leri, ONNX dönüşüm ve TensorRT motor üretim hattı
+  Loss uygulamaları ve sweep'leri, YOLO ve RT-DETR modellerinin ONNX dönüşümü ve fp16/int8
+  sürümlerinin üretimine katkı
 - **Hakan Enes Demir** — model ablasyon denemeleri ve eğitim koşularının karşılaştırılması
 
 ## Kaynaklar
